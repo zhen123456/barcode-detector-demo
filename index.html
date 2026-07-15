@@ -47,6 +47,20 @@
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
     }
 
+    .btn-content {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-content svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.4;
+      flex: 0 0 auto;
+    }
+
     button.secondary {
       color: #fff;
       background: rgba(15, 23, 42, 0.54);
@@ -205,6 +219,31 @@
       pointer-events: none;
     }
 
+    .capture-frame {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      top: 22%;
+      height: 48%;
+      pointer-events: none;
+    }
+
+    .capture-frame.outer {
+      border: 2px dashed rgba(255, 255, 255, 0.92);
+      border-radius: 22px;
+      box-shadow: 0 0 28px rgba(255, 255, 255, 0.18);
+    }
+
+    .capture-frame.inner {
+      left: 14%;
+      right: 14%;
+      top: 26%;
+      height: 40%;
+      border: 2px solid rgba(255, 255, 255, 0.94);
+      border-radius: 50%;
+      box-shadow: 0 0 28px rgba(255, 255, 255, 0.20);
+    }
+
     .camera-copy {
       position: absolute;
       left: 14px;
@@ -269,6 +308,31 @@
       color: #fff;
       font-size: 11px;
       text-align: center;
+    }
+
+    .toast {
+      position: fixed;
+      left: 14px;
+      right: 14px;
+      top: calc(58px + env(safe-area-inset-top));
+      z-index: 60;
+      transform: translateY(-12px);
+      opacity: 0;
+      border-radius: 999px;
+      padding: 10px 12px;
+      color: #172033;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.20);
+      font-size: 14px;
+      font-weight: 800;
+      text-align: center;
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
     }
 
     .content-screen {
@@ -517,10 +581,20 @@
       }
 
       .topbar,
-      .bottom-bar {
+      .bottom-bar,
+      .toast {
         left: 50%;
         width: 430px;
         transform: translateX(-50%);
+      }
+
+      .toast {
+        right: auto;
+        transform: translateX(-50%) translateY(-12px);
+      }
+
+      .toast.show {
+        transform: translateX(-50%) translateY(0);
       }
     }
   </style>
@@ -540,6 +614,7 @@
         <span data-progress="done"></span>
       </div>
     </header>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <main>
       <section id="screen-scan" class="screen camera-screen active">
@@ -562,6 +637,7 @@
         <div class="video-wrap">
           <video id="outerMirror" playsinline muted></video>
           <div class="video-dim"></div>
+          <div class="capture-frame outer" aria-hidden="true"></div>
         </div>
         <div class="camera-copy">
           <h2 class="camera-title">拍包裹外观</h2>
@@ -577,6 +653,7 @@
         <div class="video-wrap">
           <video id="innerMirror" playsinline muted></video>
           <div class="video-dim"></div>
+          <div class="capture-frame inner" aria-hidden="true"></div>
         </div>
         <div class="camera-copy">
           <h2 class="camera-title">拍包裹内物品</h2>
@@ -667,6 +744,7 @@
     const innerMirror = document.querySelector("#innerMirror");
     const canvas = document.querySelector("#canvas");
     const supportStatus = document.querySelector("#supportStatus");
+    const toast = document.querySelector("#toast");
     const cameraTip = document.querySelector("#cameraTip");
     const manualOrder = document.querySelector("#manualOrder");
     const manualBtn = document.querySelector("#manualBtn");
@@ -695,6 +773,7 @@
     let currentOrder = null;
     let outerPhotoData = "";
     let innerPhotoData = "";
+    let toastTimer = 0;
 
     const preferredFormats = [
       "qr_code", "aztec", "code_128", "code_39", "code_93", "codabar",
@@ -709,6 +788,33 @@
     function setSupport(text, className) {
       supportStatus.textContent = text;
       supportStatus.className = `support ${className || ""}`.trim();
+    }
+
+    function iconSvg(name) {
+      const icons = {
+        scan: '<path d="M4 7V5a1 1 0 0 1 1-1h2"/><path d="M17 4h2a1 1 0 0 1 1 1v2"/><path d="M20 17v2a1 1 0 0 1-1 1h-2"/><path d="M7 20H5a1 1 0 0 1-1-1v-2"/><path d="M7 12h10"/>',
+        camera: '<path d="M14.5 4 13 6H8.5L7 4H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3.5"/>',
+        rotate: '<path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v6h-6"/>',
+        back: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+        check: '<path d="M20 6 9 17l-5-5"/>',
+        next: '<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>',
+        close: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+        alert: '<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>'
+      };
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name] || icons.next}</svg>`;
+    }
+
+    function setButton(button, icon, label) {
+      button.innerHTML = `<span class="btn-content">${iconSvg(icon)}<span>${label}</span></span>`;
+    }
+
+    function showToast(message) {
+      clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.classList.add("show");
+      toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2200);
     }
 
     function showScreen(step) {
@@ -734,37 +840,38 @@
       primaryBtn.disabled = false;
 
       if (currentStep === "scan") {
-        primaryBtn.textContent = scanning ? "正在扫描..." : "开启摄像头扫码";
+        setButton(primaryBtn, scanning ? "alert" : "scan", scanning ? "正在扫描..." : "开启摄像头扫码");
         primaryBtn.disabled = scanning || !detector;
-        if (!detector) primaryBtn.textContent = "当前浏览器不支持扫码";
+        if (!detector) setButton(primaryBtn, "alert", "当前浏览器不支持扫码");
         return;
       }
 
       if (currentStep === "outer") {
-        primaryBtn.textContent = outerPhotoData ? "重新拍外箱" : "拍包裹外观";
+        setButton(primaryBtn, outerPhotoData ? "rotate" : "camera", outerPhotoData ? "重新拍外箱" : "拍包裹外观");
         showSecondary("重新开始", resetWorkflow);
         return;
       }
 
       if (currentStep === "inner") {
-        primaryBtn.textContent = innerPhotoData ? "重新拍内件" : "拍包裹内物品";
+        setButton(primaryBtn, innerPhotoData ? "rotate" : "camera", innerPhotoData ? "重新拍内件" : "拍包裹内物品");
         showSecondary("返回外箱", () => showScreen("outer"));
         return;
       }
 
       if (currentStep === "confirm") {
-        primaryBtn.textContent = "确认数量，完成退货";
+        setButton(primaryBtn, "check", "确认数量，完成退货");
         showSecondary("返回内件", () => showScreen("inner"));
         return;
       }
 
-      primaryBtn.textContent = "继续下一个";
+      setButton(primaryBtn, "next", "继续下一个");
       showSecondary("关闭摄像头", stopCamera);
     }
 
     function showSecondary(text, handler) {
       bottomBar.classList.add("two");
-      secondaryBtn.textContent = text;
+      const icon = text.includes("关闭") ? "close" : text.includes("返回") ? "back" : "rotate";
+      setButton(secondaryBtn, icon, text);
       secondaryBtn.onclick = handler;
       secondaryBtn.classList.remove("hidden");
     }
@@ -907,6 +1014,7 @@
       innerPhotoData = "";
       outerPreviewCard.classList.add("hidden");
       innerPreviewCard.classList.add("hidden");
+      showToast(`已扫描：${currentOrder.returnNo}`);
       showScreen("outer");
       await ensureCamera();
       log(`识别到退货单 ${currentOrder.returnNo}`);
@@ -1045,6 +1153,7 @@
     window.addEventListener("beforeunload", stopCamera);
 
     checkSupport();
+    setButton(manualBtn, "scan", "模拟扫码");
     updateBottomBar();
   </script>
 </body>
