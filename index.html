@@ -245,6 +245,7 @@
     let detector = null;
     let stream = null;
     let scanning = false;
+    let resultHandled = false;
     let rafId = 0;
 
     const preferredFormats = [
@@ -316,6 +317,7 @@
         await video.play();
 
         scanning = true;
+        resultHandled = false;
         startBtn.disabled = true;
         stopBtn.disabled = false;
         lastResult.textContent = "扫描中...";
@@ -332,10 +334,15 @@
 
       try {
         const barcodes = await detector.detect(video);
-        if (barcodes.length > 0) {
+        if (barcodes.length > 0 && !resultHandled) {
+          resultHandled = true;
           const lines = barcodes.map((barcode) => `${barcode.format}: ${barcode.rawValue}`);
-          lastResult.textContent = lines.join(" | ");
+          const message = lines.join(" | ");
+          lastResult.textContent = message;
           log(`识别到 ${barcodes.length} 个码：${lines.join(" ; ")}`);
+          stopScanner();
+          alert(`识别结果：\n${message}`);
+          return;
         }
       } catch (error) {
         log(`识别失败：${error.message || String(error)}`);
