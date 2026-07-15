@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>退货确认收货扫码 Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>退货收货 H5 Demo</title>
   <style>
     :root {
       color-scheme: light;
@@ -14,12 +14,18 @@
 
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: #f4f6f8;
     }
 
     body {
-      margin: 0;
-      min-height: 100vh;
-      background: #f4f6f8;
+      overscroll-behavior-y: contain;
     }
 
     button,
@@ -28,130 +34,158 @@
     }
 
     button {
-      min-height: 42px;
+      width: 100%;
+      min-height: 48px;
       border: 0;
-      border-radius: 6px;
-      padding: 0 14px;
+      border-radius: 8px;
+      padding: 0 16px;
       color: #fff;
       background: #0f62c9;
+      font-size: 16px;
+      font-weight: 700;
       cursor: pointer;
     }
 
     button.secondary {
       color: #1f2937;
-      background: #e6ebf2;
+      background: #e7edf5;
     }
 
-    button.danger {
-      color: #fff;
-      background: #b42318;
+    button.ghost {
+      color: #3b4a5f;
+      background: transparent;
+      border: 1px solid #d7dee9;
     }
 
     button:disabled {
+      opacity: 0.5;
       cursor: not-allowed;
-      opacity: 0.55;
     }
 
-    input[type="text"],
-    input[type="number"] {
+    input {
       width: 100%;
-      min-height: 40px;
+      min-height: 46px;
       border: 1px solid #cfd8e3;
-      border-radius: 6px;
-      padding: 8px 10px;
-      color: #172033;
+      border-radius: 8px;
+      padding: 0 12px;
       background: #fff;
+      color: #172033;
+      font-size: 15px;
     }
 
     .app {
-      width: min(1180px, 100%);
-      margin: 0 auto;
-      padding: 20px;
+      min-height: 100dvh;
       display: grid;
-      gap: 16px;
+      grid-template-rows: auto 1fr auto;
     }
 
     .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+      background: rgba(244, 246, 248, 0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #dfe6ef;
+    }
+
+    .topline {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
 
     h1 {
       margin: 0;
-      font-size: 22px;
+      font-size: 17px;
       line-height: 1.2;
     }
 
-    .status {
-      display: inline-flex;
-      align-items: center;
-      min-height: 28px;
-      border-radius: 999px;
-      padding: 0 10px;
-      font-size: 13px;
-      color: #42526a;
-      background: #e8edf4;
+    .support {
+      max-width: 48%;
+      overflow: hidden;
+      text-overflow: ellipsis;
       white-space: nowrap;
+      border-radius: 999px;
+      padding: 5px 9px;
+      color: #46566f;
+      background: #e7edf5;
+      font-size: 12px;
     }
 
-    .status.ok {
+    .support.ok {
       color: #166534;
       background: #dcfce7;
     }
 
-    .status.bad {
+    .support.bad {
       color: #991b1b;
       background: #fee2e2;
     }
 
-    .workflow {
+    .progress {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
     }
 
-    .step {
-      border: 1px solid #d7dee9;
-      border-radius: 6px;
-      padding: 10px;
-      background: #fff;
-      color: #64748b;
-      font-size: 13px;
+    .progress span {
+      height: 5px;
+      border-radius: 999px;
+      background: #d9e1ec;
     }
 
-    .step strong {
+    .progress span.active,
+    .progress span.done {
+      background: #0f62c9;
+    }
+
+    .screen {
+      display: none;
+      min-width: 0;
+      padding: 14px;
+      padding-bottom: 96px;
+    }
+
+    .screen.active {
       display: block;
-      margin-bottom: 3px;
-      color: #172033;
+    }
+
+    .page-title {
+      margin: 4px 0 6px;
+      font-size: 24px;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    .hint {
+      margin: 0 0 14px;
+      color: #5f6f85;
       font-size: 14px;
+      line-height: 1.55;
     }
 
-    .step.active {
-      border-color: #0f62c9;
-      box-shadow: inset 0 0 0 1px #0f62c9;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
-      gap: 16px;
-      align-items: start;
-    }
-
-    .camera,
-    .panel {
-      border: 1px solid #d7dee9;
-      border-radius: 8px;
+    .camera-card,
+    .card,
+    .item-card,
+    .photo-card {
+      border: 1px solid #dce4ef;
+      border-radius: 10px;
       background: #fff;
-      box-shadow: 0 12px 28px rgba(20, 38, 75, 0.08);
+      box-shadow: 0 10px 24px rgba(20, 38, 75, 0.06);
+    }
+
+    .camera-card {
       overflow: hidden;
     }
 
     .video-wrap {
       position: relative;
-      aspect-ratio: 4 / 3;
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      max-height: 58dvh;
       background: #101828;
     }
 
@@ -164,172 +198,213 @@
 
     .scan-frame {
       position: absolute;
-      inset: 18%;
+      left: 13%;
+      right: 13%;
+      top: 24%;
+      height: 34%;
       border: 2px solid #22c55e;
-      border-radius: 8px;
-      box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.26);
+      border-radius: 12px;
+      box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.24);
       pointer-events: none;
     }
 
-    .mode-label {
+    .camera-tip {
       position: absolute;
       left: 12px;
-      top: 12px;
+      right: 12px;
+      bottom: 12px;
       border-radius: 999px;
-      padding: 6px 10px;
+      padding: 8px 10px;
       color: #fff;
       background: rgba(15, 23, 42, 0.78);
+      text-align: center;
       font-size: 13px;
     }
 
-    .camera-actions,
-    .panel-body {
-      padding: 16px;
-    }
-
-    .button-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .manual-row {
+    .manual {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 10px;
-      margin-top: 12px;
+      gap: 8px;
+      padding: 12px;
+      border-top: 1px solid #e5ebf3;
     }
 
-    h2 {
-      margin: 0 0 12px;
-      font-size: 17px;
-    }
-
-    .muted {
-      margin: 0 0 12px;
-      color: #5f6f85;
-      line-height: 1.55;
-    }
-
-    .order-meta {
+    .meta-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
-      margin-bottom: 14px;
     }
 
     .meta {
-      border: 1px solid #e1e7ef;
-      border-radius: 6px;
-      padding: 10px;
-      background: #f8fafc;
+      padding: 12px;
+      border-bottom: 1px solid #edf1f6;
     }
 
-    .meta span {
+    .meta:last-child {
+      border-bottom: 0;
+    }
+
+    .meta span,
+    .item-sku,
+    .photo-caption {
       display: block;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
       color: #64748b;
       font-size: 12px;
     }
 
     .meta strong {
       overflow-wrap: anywhere;
-      font-size: 14px;
+      font-size: 15px;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 10px 0 14px;
-      font-size: 14px;
-    }
-
-    th,
-    td {
-      border-bottom: 1px solid #e3e9f2;
-      padding: 10px 6px;
-      text-align: left;
-      vertical-align: middle;
-    }
-
-    th {
-      color: #64748b;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    td.qty {
-      width: 88px;
-    }
-
-    .photo-grid {
+    .item-list {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
-      margin: 12px 0;
     }
 
-    figure {
-      margin: 0;
-      border: 1px solid #dfe6ef;
-      border-radius: 6px;
+    .item-card {
+      padding: 12px;
+    }
+
+    .item-name {
+      margin: 0 0 6px;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .qty-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .qty-control {
+      display: grid;
+      grid-template-columns: 42px 54px 42px;
+      align-items: center;
+      border: 1px solid #ccd6e3;
+      border-radius: 8px;
       overflow: hidden;
-      background: #f8fafc;
+      background: #fff;
     }
 
-    figure img {
+    .qty-control button {
+      min-height: 42px;
+      border-radius: 0;
+      padding: 0;
+      color: #172033;
+      background: #eef3f8;
+      font-size: 20px;
+    }
+
+    .qty-control input {
+      min-height: 42px;
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .photo-card {
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .photo-card img {
       display: block;
       width: 100%;
       aspect-ratio: 4 / 3;
       object-fit: cover;
+      background: #e7edf5;
     }
 
-    figcaption {
-      padding: 8px 10px;
-      color: #5f6f85;
-      font-size: 12px;
+    .photo-caption {
+      margin: 0;
+      padding: 9px 10px;
+    }
+
+    .success {
+      display: grid;
+      place-items: center;
+      min-height: 44dvh;
+      text-align: center;
+    }
+
+    .success-mark {
+      display: grid;
+      place-items: center;
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      color: #fff;
+      background: #16a34a;
+      font-size: 42px;
+      font-weight: 700;
+    }
+
+    details {
+      margin-top: 12px;
+    }
+
+    summary {
+      color: #64748b;
+      font-size: 13px;
     }
 
     .log {
-      min-height: 102px;
-      max-height: 170px;
+      max-height: 118px;
       overflow: auto;
       white-space: pre-wrap;
       border: 1px solid #e1e7ef;
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 10px;
-      background: #f8fafc;
+      background: #fff;
       color: #344054;
       font-family: Consolas, "Courier New", monospace;
       font-size: 12px;
+    }
+
+    .bottom-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+      border-top: 1px solid #dfe6ef;
+      background: rgba(255, 255, 255, 0.97);
+      box-shadow: 0 -12px 26px rgba(20, 38, 75, 0.08);
+    }
+
+    .bottom-bar.two {
+      grid-template-columns: 0.85fr 1.15fr;
     }
 
     .hidden {
       display: none !important;
     }
 
-    @media (max-width: 900px) {
-      .layout,
-      .workflow {
-        grid-template-columns: 1fr;
-      }
-
-      .topbar {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-    }
-
-    @media (max-width: 520px) {
+    @media (min-width: 680px) {
       .app {
-        padding: 12px;
+        width: 430px;
+        min-height: 100dvh;
+        margin: 0 auto;
+        border-left: 1px solid #dfe6ef;
+        border-right: 1px solid #dfe6ef;
+        background: #f4f6f8;
       }
 
-      .manual-row,
-      .order-meta,
-      .photo-grid {
-        grid-template-columns: 1fr;
+      .bottom-bar {
+        left: 50%;
+        width: 430px;
+        transform: translateX(-50%);
       }
     }
   </style>
@@ -337,87 +412,101 @@
 <body>
   <div class="app">
     <header class="topbar">
-      <div>
-        <h1>退货确认收货扫码 Demo</h1>
-        <p class="muted">扫码识别退货订单，拍照留存包裹外观，核对商品数量，再拍包裹内物品并完成退货收货。</p>
+      <div class="topline">
+        <h1>退货收货</h1>
+        <span id="supportStatus" class="support">检测扫码能力...</span>
       </div>
-      <span id="supportStatus" class="status">正在检测扫码能力...</span>
+      <div class="progress" aria-label="流程进度">
+        <span data-progress="scan" class="active"></span>
+        <span data-progress="outer"></span>
+        <span data-progress="confirm"></span>
+        <span data-progress="inner"></span>
+        <span data-progress="done"></span>
+      </div>
     </header>
 
-    <nav class="workflow" aria-label="退货收货流程">
-      <div id="step-scan" class="step active"><strong>1. 扫订单</strong>识别退货单号</div>
-      <div id="step-outer" class="step"><strong>2. 拍外箱</strong>留存包裹照片</div>
-      <div id="step-confirm" class="step"><strong>3. 确认数量</strong>核对商品明细</div>
-      <div id="step-inner" class="step"><strong>4. 拍内件</strong>完成并继续</div>
-    </nav>
-
-    <main class="layout">
-      <section class="camera">
-        <div class="video-wrap">
-          <video id="video" playsinline muted></video>
-          <div id="scanFrame" class="scan-frame" aria-hidden="true"></div>
-          <div id="modeLabel" class="mode-label">扫码模式</div>
-        </div>
-        <div class="camera-actions">
-          <div class="button-row">
-            <button id="startBtn" type="button">开启摄像头扫码</button>
-            <button id="captureBtn" type="button" disabled>拍照</button>
-            <button id="stopBtn" class="secondary" type="button" disabled>关闭摄像头</button>
-            <button id="resetBtn" class="secondary" type="button">重新开始</button>
+    <main>
+      <section id="screen-scan" class="screen active">
+        <h2 class="page-title">扫描退货订单</h2>
+        <p class="hint">对准退货单、面单或包裹上的二维码/条码。识别成功后自动进入拍外箱。</p>
+        <div class="camera-card">
+          <div class="video-wrap">
+            <video id="video" playsinline muted></video>
+            <div id="scanFrame" class="scan-frame" aria-hidden="true"></div>
+            <div id="cameraTip" class="camera-tip">摄像头未开启</div>
           </div>
-          <div class="manual-row">
-            <input id="manualOrder" type="text" placeholder="手动输入测试单号，如 RMA-2026-001">
+          <div class="manual">
+            <input id="manualOrder" type="text" placeholder="手动输入测试单号：RMA-2026-001">
             <button id="manualBtn" class="secondary" type="button">模拟扫码</button>
           </div>
         </div>
+        <details>
+          <summary>测试单号</summary>
+          <p class="hint">RMA-2026-001、RMA-2026-002、RET-10003</p>
+        </details>
       </section>
 
-      <section class="panel">
-        <div class="panel-body">
-          <h2 id="panelTitle">等待扫描退货订单</h2>
-          <p id="panelHint" class="muted">测试单号：RMA-2026-001、RMA-2026-002、RET-10003。也可以扫任意码，系统会生成一条待核验订单。</p>
-
-          <div id="orderBlock" class="hidden">
-            <div class="order-meta">
-              <div class="meta"><span>退货单号</span><strong id="orderNo">-</strong></div>
-              <div class="meta"><span>原订单号</span><strong id="sourceOrderNo">-</strong></div>
-              <div class="meta"><span>买家</span><strong id="buyerName">-</strong></div>
-              <div class="meta"><span>物流单号</span><strong id="trackingNo">-</strong></div>
-            </div>
-            <table>
-              <thead>
-                <tr>
-                  <th>商品</th>
-                  <th>SKU</th>
-                  <th>应收</th>
-                  <th>实收</th>
-                </tr>
-              </thead>
-              <tbody id="itemsBody"></tbody>
-            </table>
+      <section id="screen-outer" class="screen">
+        <h2 class="page-title">拍包裹外观</h2>
+        <p class="hint">先保留外箱、面单和破损情况。照片会作为退货收货凭证。</p>
+        <div class="camera-card">
+          <div class="video-wrap">
+            <video id="outerMirror" playsinline muted></video>
+            <div class="camera-tip">将完整包裹放入画面</div>
           </div>
-
-          <div id="photoBlock" class="photo-grid hidden">
-            <figure id="outerFigure" class="hidden">
-              <img id="outerPhoto" alt="包裹外观照片">
-              <figcaption>包裹外观</figcaption>
-            </figure>
-            <figure id="innerFigure" class="hidden">
-              <img id="innerPhoto" alt="包裹内物品照片">
-              <figcaption>包裹内物品</figcaption>
-            </figure>
-          </div>
-
-          <div class="button-row">
-            <button id="confirmQtyBtn" type="button" disabled>确认数量，拍内件</button>
-            <button id="completeBtn" type="button" disabled>完成退货，继续下一个</button>
-          </div>
-
-          <h2 style="margin-top:18px;">操作日志</h2>
-          <div id="log" class="log"></div>
+        </div>
+        <div id="outerPreviewCard" class="photo-card hidden">
+          <img id="outerPhoto" alt="包裹外观照片">
+          <p class="photo-caption">包裹外观照片</p>
         </div>
       </section>
+
+      <section id="screen-confirm" class="screen">
+        <h2 class="page-title">确认收货数量</h2>
+        <p class="hint">核对退货订单和商品明细，确认实际收到的数量。</p>
+        <div class="card meta-grid">
+          <div class="meta"><span>退货单号</span><strong id="orderNo">-</strong></div>
+          <div class="meta"><span>原订单号</span><strong id="sourceOrderNo">-</strong></div>
+          <div class="meta"><span>买家</span><strong id="buyerName">-</strong></div>
+          <div class="meta"><span>物流单号</span><strong id="trackingNo">-</strong></div>
+        </div>
+        <div id="itemsList" class="item-list" style="margin-top:12px;"></div>
+      </section>
+
+      <section id="screen-inner" class="screen">
+        <h2 class="page-title">拍包裹内物品</h2>
+        <p class="hint">打开包裹后，把商品和配件一起放入画面，拍照后即可完成退货。</p>
+        <div class="camera-card">
+          <div class="video-wrap">
+            <video id="innerMirror" playsinline muted></video>
+            <div class="camera-tip">拍清楚内件和配件</div>
+          </div>
+        </div>
+        <div id="innerPreviewCard" class="photo-card hidden">
+          <img id="innerPhoto" alt="包裹内物品照片">
+          <p class="photo-caption">包裹内物品照片</p>
+        </div>
+      </section>
+
+      <section id="screen-done" class="screen">
+        <div class="success">
+          <div>
+            <div class="success-mark">✓</div>
+            <h2 class="page-title">退货已完成</h2>
+            <p id="doneSummary" class="hint">已完成确认收货。</p>
+          </div>
+        </div>
+        <details>
+          <summary>操作日志</summary>
+          <div id="log" class="log"></div>
+        </details>
+      </section>
     </main>
+
+    <footer id="bottomBar" class="bottom-bar">
+      <button id="primaryBtn" type="button">开启摄像头扫码</button>
+      <button id="secondaryBtn" class="ghost hidden" type="button">重新开始</button>
+    </footer>
   </div>
 
   <canvas id="canvas" class="hidden"></canvas>
@@ -455,34 +544,29 @@
       }
     };
 
-    const steps = ["scan", "outer", "confirm", "inner"];
+    const stepOrder = ["scan", "outer", "confirm", "inner", "done"];
     const video = document.querySelector("#video");
+    const outerMirror = document.querySelector("#outerMirror");
+    const innerMirror = document.querySelector("#innerMirror");
     const canvas = document.querySelector("#canvas");
     const supportStatus = document.querySelector("#supportStatus");
-    const scanFrame = document.querySelector("#scanFrame");
-    const modeLabel = document.querySelector("#modeLabel");
-    const startBtn = document.querySelector("#startBtn");
-    const captureBtn = document.querySelector("#captureBtn");
-    const stopBtn = document.querySelector("#stopBtn");
-    const resetBtn = document.querySelector("#resetBtn");
+    const cameraTip = document.querySelector("#cameraTip");
     const manualOrder = document.querySelector("#manualOrder");
     const manualBtn = document.querySelector("#manualBtn");
-    const panelTitle = document.querySelector("#panelTitle");
-    const panelHint = document.querySelector("#panelHint");
-    const orderBlock = document.querySelector("#orderBlock");
     const orderNo = document.querySelector("#orderNo");
     const sourceOrderNo = document.querySelector("#sourceOrderNo");
     const buyerName = document.querySelector("#buyerName");
     const trackingNo = document.querySelector("#trackingNo");
-    const itemsBody = document.querySelector("#itemsBody");
-    const photoBlock = document.querySelector("#photoBlock");
-    const outerFigure = document.querySelector("#outerFigure");
-    const innerFigure = document.querySelector("#innerFigure");
+    const itemsList = document.querySelector("#itemsList");
     const outerPhoto = document.querySelector("#outerPhoto");
     const innerPhoto = document.querySelector("#innerPhoto");
-    const confirmQtyBtn = document.querySelector("#confirmQtyBtn");
-    const completeBtn = document.querySelector("#completeBtn");
+    const outerPreviewCard = document.querySelector("#outerPreviewCard");
+    const innerPreviewCard = document.querySelector("#innerPreviewCard");
+    const doneSummary = document.querySelector("#doneSummary");
     const logEl = document.querySelector("#log");
+    const bottomBar = document.querySelector("#bottomBar");
+    const primaryBtn = document.querySelector("#primaryBtn");
+    const secondaryBtn = document.querySelector("#secondaryBtn");
 
     let detector = null;
     let stream = null;
@@ -516,33 +600,74 @@
 
     function setSupport(text, className) {
       supportStatus.textContent = text;
-      supportStatus.className = `status ${className || ""}`.trim();
+      supportStatus.className = `support ${className || ""}`.trim();
     }
 
-    function setStep(step) {
+    function showScreen(step) {
       currentStep = step;
-      for (const item of steps) {
-        document.querySelector(`#step-${item}`).classList.toggle("active", item === step);
+      document.querySelectorAll(".screen").forEach((screen) => {
+        screen.classList.toggle("active", screen.id === `screen-${step}`);
+      });
+
+      const activeIndex = stepOrder.indexOf(step);
+      document.querySelectorAll("[data-progress]").forEach((item, index) => {
+        item.classList.toggle("active", index === activeIndex);
+        item.classList.toggle("done", index < activeIndex);
+      });
+
+      updateBottomBar();
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+    function updateBottomBar() {
+      secondaryBtn.classList.add("hidden");
+      bottomBar.classList.remove("two");
+      primaryBtn.disabled = false;
+
+      if (currentStep === "scan") {
+        primaryBtn.textContent = scanning ? "正在扫描..." : "开启摄像头扫码";
+        primaryBtn.disabled = scanning || !detector;
+        if (!detector) primaryBtn.textContent = "当前浏览器不支持扫码";
+        return;
       }
 
-      const labels = {
-        scan: "扫码模式",
-        outer: "拍包裹外观",
-        confirm: "确认商品数量",
-        inner: "拍包裹内物品"
-      };
+      if (currentStep === "outer") {
+        primaryBtn.textContent = outerPhotoData ? "重新拍外箱" : "拍包裹外观";
+        showSecondary("重新开始", resetWorkflow);
+        return;
+      }
 
-      modeLabel.textContent = labels[step];
-      scanFrame.classList.toggle("hidden", step !== "scan");
-      captureBtn.disabled = !(step === "outer" || step === "inner") || !stream;
-      confirmQtyBtn.disabled = step !== "confirm";
-      completeBtn.disabled = step !== "inner" || !innerPhotoData;
+      if (currentStep === "confirm") {
+        primaryBtn.textContent = "确认数量，下一步";
+        showSecondary("重新拍外箱", () => showScreen("outer"));
+        return;
+      }
+
+      if (currentStep === "inner") {
+        primaryBtn.textContent = innerPhotoData ? "完成退货" : "拍包裹内物品";
+        showSecondary("返回数量", () => showScreen("confirm"));
+        return;
+      }
+
+      primaryBtn.textContent = "继续下一个";
+      showSecondary("关闭摄像头", stopCamera);
+    }
+
+    function showSecondary(text, handler) {
+      bottomBar.classList.add("two");
+      secondaryBtn.textContent = text;
+      secondaryBtn.onclick = handler;
+      secondaryBtn.classList.remove("hidden");
     }
 
     function normalizeOrderCode(value) {
       const text = String(value || "").trim().toUpperCase();
       const knownKey = Object.keys(demoOrders).find((key) => text.includes(key));
       return knownKey || text;
+    }
+
+    function cloneOrder(order) {
+      return JSON.parse(JSON.stringify(order));
     }
 
     function buildFallbackOrder(rawCode) {
@@ -560,7 +685,7 @@
 
     function findOrder(rawCode) {
       const code = normalizeOrderCode(rawCode);
-      return structuredClone(demoOrders[code] || buildFallbackOrder(code));
+      return cloneOrder(demoOrders[code] || buildFallbackOrder(code));
     }
 
     function renderOrder() {
@@ -569,24 +694,27 @@
       sourceOrderNo.textContent = currentOrder.sourceOrderNo;
       buyerName.textContent = currentOrder.buyerName;
       trackingNo.textContent = currentOrder.trackingNo;
-      itemsBody.innerHTML = currentOrder.items.map((item, index) => `
-        <tr>
-          <td>${item.name}</td>
-          <td>${item.sku}</td>
-          <td>${item.expectedQty}</td>
-          <td class="qty">
-            <input class="qty-input" type="number" min="0" step="1" value="${item.receivedQty ?? item.expectedQty}" data-index="${index}" aria-label="${item.sku} 实收数量">
-          </td>
-        </tr>
+      itemsList.innerHTML = currentOrder.items.map((item, index) => `
+        <article class="item-card">
+          <p class="item-name">${item.name}</p>
+          <span class="item-sku">${item.sku}</span>
+          <div class="qty-row">
+            <span>应收 ${item.expectedQty}</span>
+            <div class="qty-control">
+              <button type="button" data-qty-minus="${index}">-</button>
+              <input type="number" min="0" step="1" value="${item.receivedQty ?? item.expectedQty}" data-qty="${index}" aria-label="${item.sku} 实收数量">
+              <button type="button" data-qty-plus="${index}">+</button>
+            </div>
+          </div>
+        </article>
       `).join("");
-      orderBlock.classList.remove("hidden");
     }
 
     async function checkSupport() {
       if (!("BarcodeDetector" in window)) {
-        setSupport("当前浏览器不支持原生扫码", "bad");
-        startBtn.disabled = true;
-        log("BarcodeDetector 不可用，可用手动输入测试单号继续体验流程");
+        setSupport("不支持原生扫码", "bad");
+        log("BarcodeDetector 不可用，可用手动输入测试流程");
+        updateBottomBar();
         return;
       }
 
@@ -596,13 +724,13 @@
         detector = new BarcodeDetector({
           formats: usableFormats.length ? usableFormats : supportedFormats
         });
-        setSupport(`支持原生扫码：${supportedFormats.length} 种码制`, "ok");
+        setSupport("扫码可用", "ok");
         log(`BarcodeDetector 已就绪：${supportedFormats.join(", ")}`);
       } catch (error) {
         setSupport("扫码初始化失败", "bad");
-        startBtn.disabled = true;
         log(error.message || String(error));
       }
+      updateBottomBar();
     }
 
     async function ensureCamera() {
@@ -613,41 +741,34 @@
           video: {
             facingMode: { ideal: "environment" },
             width: { ideal: 1280 },
-            height: { ideal: 720 }
+            height: { ideal: 1920 }
           },
           audio: false
         });
         video.srcObject = stream;
+        outerMirror.srcObject = stream;
+        innerMirror.srcObject = stream;
         await video.play();
-        stopBtn.disabled = false;
-        captureBtn.disabled = !(currentStep === "outer" || currentStep === "inner");
+        outerMirror.play().catch(() => {});
+        innerMirror.play().catch(() => {});
+        cameraTip.textContent = "对准退货单二维码/条码";
         log("摄像头已开启");
         return true;
       } catch (error) {
         log(`摄像头开启失败：${error.message || String(error)}`);
-        alert("摄像头开启失败，请检查浏览器权限，并确认使用 HTTPS 或 localhost 访问。");
+        alert("摄像头开启失败，请检查权限，并确认使用 HTTPS 或 localhost 访问。");
         return false;
       }
     }
 
     async function startScanner() {
-      if (!detector) {
-        alert("当前浏览器不支持 BarcodeDetector，请用手动输入模拟流程，或换 Android Chrome / macOS Chrome 测试。");
-        return;
-      }
-
-      resetWorkflow(false);
+      if (!detector) return;
+      resetWorkflow({ keepCamera: false, silent: true });
       if (!(await ensureCamera())) return;
-      beginScanning("开始扫描退货订单");
-    }
-
-    function beginScanning(logMessage) {
       scanning = true;
-      startBtn.disabled = true;
-      setStep("scan");
-      panelTitle.textContent = "正在扫描退货订单";
-      panelHint.textContent = "请将退货单、面单或包裹上的二维码/条码放入绿色框内。";
-      log(logMessage);
+      showScreen("scan");
+      updateBottomBar();
+      log("开始扫描退货订单");
       scanLoop();
     }
 
@@ -657,10 +778,9 @@
       try {
         const barcodes = await detector.detect(video);
         if (barcodes.length > 0) {
-          const rawValue = barcodes[0].rawValue;
           scanning = false;
           cancelAnimationFrame(rafId);
-          handleOrderDetected(rawValue);
+          handleOrderDetected(barcodes[0].rawValue);
           return;
         }
       } catch (error) {
@@ -675,21 +795,17 @@
       outerPhotoData = "";
       innerPhotoData = "";
       renderOrder();
-      photoBlock.classList.add("hidden");
-      outerFigure.classList.add("hidden");
-      innerFigure.classList.add("hidden");
-      panelTitle.textContent = "已识别订单，请拍包裹外观";
-      panelHint.textContent = `识别结果：${rawValue}。请把包裹完整放入画面后拍照。`;
-      startBtn.disabled = false;
-      setStep("outer");
+      outerPreviewCard.classList.add("hidden");
+      innerPreviewCard.classList.add("hidden");
+      showScreen("outer");
       await ensureCamera();
       log(`识别到退货单 ${currentOrder.returnNo}`);
     }
 
-    function capturePhoto() {
+    function capturePhoto(kind) {
       if (!stream || !video.videoWidth) {
         alert("摄像头尚未就绪。");
-        return;
+        return false;
       }
 
       canvas.width = video.videoWidth;
@@ -698,84 +814,57 @@
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const dataUrl = canvas.toDataURL("image/jpeg", 0.86);
 
-      if (currentStep === "outer") {
+      if (kind === "outer") {
         outerPhotoData = dataUrl;
         outerPhoto.src = dataUrl;
-        photoBlock.classList.remove("hidden");
-        outerFigure.classList.remove("hidden");
-        panelTitle.textContent = "确认退货商品数量";
-        panelHint.textContent = "核对实收数量，必要时调整数量，然后进入内件拍照。";
-        setStep("confirm");
+        outerPreviewCard.classList.remove("hidden");
         log("已拍摄包裹外观");
-        return;
+        return true;
       }
 
-      if (currentStep === "inner") {
-        innerPhotoData = dataUrl;
-        innerPhoto.src = dataUrl;
-        photoBlock.classList.remove("hidden");
-        innerFigure.classList.remove("hidden");
-        completeBtn.disabled = false;
-        panelTitle.textContent = "内件照片已留存";
-        panelHint.textContent = "确认照片和数量无误后，完成退货收货并继续下一个。";
-        log("已拍摄包裹内物品");
-      }
+      innerPhotoData = dataUrl;
+      innerPhoto.src = dataUrl;
+      innerPreviewCard.classList.remove("hidden");
+      log("已拍摄包裹内物品");
+      return true;
     }
 
-    function confirmQuantities() {
+    function saveQuantities() {
       if (!currentOrder) return;
-
-      const inputs = document.querySelectorAll(".qty-input");
-      for (const input of inputs) {
-        const index = Number(input.dataset.index);
+      document.querySelectorAll("[data-qty]").forEach((input) => {
+        const index = Number(input.dataset.qty);
         currentOrder.items[index].receivedQty = Number(input.value || 0);
-      }
-
-      panelTitle.textContent = "请拍包裹内物品";
-      panelHint.textContent = "打开包裹后，将实物和随附配件放入画面，拍照留存。";
-      setStep("inner");
+      });
       log(`已确认数量：${currentOrder.items.map((item) => `${item.sku}=${item.receivedQty}`).join(", ")}`);
     }
 
     function completeReturn() {
       if (!currentOrder || !innerPhotoData) return;
-
+      saveQuantities();
       const summary = currentOrder.items
         .map((item) => `${item.sku} 实收 ${item.receivedQty ?? item.expectedQty}/${item.expectedQty}`)
         .join("；");
-
-      alert(`退货收货完成\n${currentOrder.returnNo}\n${summary}`);
+      doneSummary.textContent = `${currentOrder.returnNo} 已完成。${summary}`;
       log(`退货完成：${currentOrder.returnNo}`);
-      resetWorkflow(true);
-      if (detector && stream) {
-        beginScanning("继续扫描下一个退货订单");
-      }
+      showScreen("done");
     }
 
-    function resetWorkflow(keepCamera) {
+    function resetWorkflow(options = {}) {
+      const keepCamera = Boolean(options.keepCamera);
       scanning = false;
       cancelAnimationFrame(rafId);
       currentOrder = null;
       outerPhotoData = "";
       innerPhotoData = "";
       manualOrder.value = "";
-      panelTitle.textContent = "等待扫描退货订单";
-      panelHint.textContent = "测试单号：RMA-2026-001、RMA-2026-002、RET-10003。也可以扫任意码，系统会生成一条待核验订单。";
-      orderBlock.classList.add("hidden");
-      photoBlock.classList.add("hidden");
-      outerFigure.classList.add("hidden");
-      innerFigure.classList.add("hidden");
+      itemsList.innerHTML = "";
       outerPhoto.removeAttribute("src");
       innerPhoto.removeAttribute("src");
-      itemsBody.innerHTML = "";
-      startBtn.disabled = !detector;
-      confirmQtyBtn.disabled = true;
-      completeBtn.disabled = true;
-      setStep("scan");
-
-      if (!keepCamera) {
-        stopCamera();
-      }
+      outerPreviewCard.classList.add("hidden");
+      innerPreviewCard.classList.add("hidden");
+      showScreen("scan");
+      if (!keepCamera) stopCamera();
+      if (!options.silent) log("流程已重置");
     }
 
     function stopCamera() {
@@ -786,18 +875,45 @@
         stream = null;
       }
       video.srcObject = null;
-      stopBtn.disabled = true;
-      captureBtn.disabled = true;
-      startBtn.disabled = !detector;
+      outerMirror.srcObject = null;
+      innerMirror.srcObject = null;
+      cameraTip.textContent = "摄像头未开启";
+      updateBottomBar();
       log("摄像头已关闭");
     }
 
-    startBtn.addEventListener("click", startScanner);
-    captureBtn.addEventListener("click", capturePhoto);
-    stopBtn.addEventListener("click", stopCamera);
-    resetBtn.addEventListener("click", () => resetWorkflow(false));
-    confirmQtyBtn.addEventListener("click", confirmQuantities);
-    completeBtn.addEventListener("click", completeReturn);
+    primaryBtn.addEventListener("click", async () => {
+      if (currentStep === "scan") {
+        await startScanner();
+        return;
+      }
+      if (currentStep === "outer") {
+        if (capturePhoto("outer")) showScreen("confirm");
+        return;
+      }
+      if (currentStep === "confirm") {
+        saveQuantities();
+        showScreen("inner");
+        return;
+      }
+      if (currentStep === "inner") {
+        if (!innerPhotoData) {
+          capturePhoto("inner");
+          updateBottomBar();
+          return;
+        }
+        completeReturn();
+        return;
+      }
+      resetWorkflow({ keepCamera: true });
+      if (detector && stream) {
+        scanning = true;
+        updateBottomBar();
+        log("继续扫描下一个退货订单");
+        scanLoop();
+      }
+    });
+
     manualBtn.addEventListener("click", () => {
       const value = manualOrder.value.trim();
       if (!value) {
@@ -806,9 +922,21 @@
       }
       handleOrderDetected(value);
     });
+
+    itemsList.addEventListener("click", (event) => {
+      const minus = event.target.closest("[data-qty-minus]");
+      const plus = event.target.closest("[data-qty-plus]");
+      if (!minus && !plus) return;
+      const index = Number((minus || plus).dataset.qtyMinus ?? (minus || plus).dataset.qtyPlus);
+      const input = document.querySelector(`[data-qty="${index}"]`);
+      const current = Number(input.value || 0);
+      input.value = Math.max(0, current + (plus ? 1 : -1));
+    });
+
     window.addEventListener("beforeunload", stopCamera);
 
     checkSupport();
+    updateBottomBar();
   </script>
 </body>
 </html>
