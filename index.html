@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Chrome BarcodeDetector 扫码 Demo</title>
+  <title>退货确认收货扫码 Demo</title>
   <style>
     :root {
       color-scheme: light;
       font-family: Arial, "Microsoft YaHei", sans-serif;
-      background: #f5f7fb;
-      color: #182033;
+      background: #f4f6f8;
+      color: #172033;
     }
 
     * {
@@ -19,89 +19,32 @@
     body {
       margin: 0;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
+      background: #f4f6f8;
     }
 
-    main {
-      width: min(960px, 100%);
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 18px;
-    }
-
-    section {
-      background: #ffffff;
-      border: 1px solid #dce3ef;
-      border-radius: 8px;
-      box-shadow: 0 14px 34px rgba(20, 38, 75, 0.08);
-    }
-
-    .scanner {
-      overflow: hidden;
-    }
-
-    .video-wrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      background: #111827;
-    }
-
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .scan-box {
-      position: absolute;
-      inset: 18%;
-      border: 2px solid #22c55e;
-      border-radius: 8px;
-      box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.24);
-      pointer-events: none;
-    }
-
-    .controls,
-    .panel {
-      padding: 18px;
-    }
-
-    h1 {
-      margin: 0 0 10px;
-      font-size: 22px;
-      line-height: 1.25;
-    }
-
-    h2 {
-      margin: 0 0 12px;
-      font-size: 16px;
-    }
-
-    p {
-      margin: 0 0 14px;
-      line-height: 1.65;
-      color: #526071;
+    button,
+    input {
+      font: inherit;
     }
 
     button {
-      min-height: 40px;
+      min-height: 42px;
       border: 0;
       border-radius: 6px;
       padding: 0 14px;
-      font-size: 14px;
+      color: #fff;
+      background: #0f62c9;
       cursor: pointer;
-      color: #ffffff;
-      background: #1267d8;
     }
 
     button.secondary {
-      color: #182033;
-      background: #e8edf5;
+      color: #1f2937;
+      background: #e6ebf2;
+    }
+
+    button.danger {
+      color: #fff;
+      background: #b42318;
     }
 
     button:disabled {
@@ -109,11 +52,36 @@
       opacity: 0.55;
     }
 
-    .button-row {
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid #cfd8e3;
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: #172033;
+      background: #fff;
+    }
+
+    .app {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .topbar {
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
     }
 
     .status {
@@ -123,8 +91,9 @@
       border-radius: 999px;
       padding: 0 10px;
       font-size: 13px;
-      background: #eef2f8;
       color: #42526a;
+      background: #e8edf4;
+      white-space: nowrap;
     }
 
     .status.ok {
@@ -132,121 +101,397 @@
       background: #dcfce7;
     }
 
-    .status.warn {
-      color: #92400e;
-      background: #fef3c7;
-    }
-
     .status.bad {
       color: #991b1b;
       background: #fee2e2;
     }
 
-    dl {
-      margin: 0;
+    .workflow {
       display: grid;
-      gap: 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
     }
 
-    dt {
-      font-size: 12px;
-      color: #6b778a;
-      margin-bottom: 4px;
-    }
-
-    dd {
-      margin: 0;
-      min-height: 24px;
-      overflow-wrap: anywhere;
-    }
-
-    code,
-    pre {
-      font-family: Consolas, "Courier New", monospace;
+    .step {
+      border: 1px solid #d7dee9;
+      border-radius: 6px;
+      padding: 10px;
+      background: #fff;
+      color: #64748b;
       font-size: 13px;
     }
 
-    pre {
-      min-height: 128px;
-      max-height: 230px;
+    .step strong {
+      display: block;
+      margin-bottom: 3px;
+      color: #172033;
+      font-size: 14px;
+    }
+
+    .step.active {
+      border-color: #0f62c9;
+      box-shadow: inset 0 0 0 1px #0f62c9;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .camera,
+    .panel {
+      border: 1px solid #d7dee9;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 12px 28px rgba(20, 38, 75, 0.08);
+      overflow: hidden;
+    }
+
+    .video-wrap {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      background: #101828;
+    }
+
+    video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .scan-frame {
+      position: absolute;
+      inset: 18%;
+      border: 2px solid #22c55e;
+      border-radius: 8px;
+      box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.26);
+      pointer-events: none;
+    }
+
+    .mode-label {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: #fff;
+      background: rgba(15, 23, 42, 0.78);
+      font-size: 13px;
+    }
+
+    .camera-actions,
+    .panel-body {
+      padding: 16px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .manual-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 17px;
+    }
+
+    .muted {
+      margin: 0 0 12px;
+      color: #5f6f85;
+      line-height: 1.55;
+    }
+
+    .order-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .meta {
+      border: 1px solid #e1e7ef;
+      border-radius: 6px;
+      padding: 10px;
+      background: #f8fafc;
+    }
+
+    .meta span {
+      display: block;
+      margin-bottom: 3px;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .meta strong {
+      overflow-wrap: anywhere;
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 14px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #e3e9f2;
+      padding: 10px 6px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    td.qty {
+      width: 88px;
+    }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    figure {
+      margin: 0;
+      border: 1px solid #dfe6ef;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+
+    figure img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+    }
+
+    figcaption {
+      padding: 8px 10px;
+      color: #5f6f85;
+      font-size: 12px;
+    }
+
+    .log {
+      min-height: 102px;
+      max-height: 170px;
       overflow: auto;
       white-space: pre-wrap;
-      background: #f6f8fb;
-      border: 1px solid #e2e8f0;
+      border: 1px solid #e1e7ef;
       border-radius: 6px;
-      padding: 12px;
+      padding: 10px;
+      background: #f8fafc;
+      color: #344054;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
     }
 
-    .hint {
-      margin-top: 14px;
-      font-size: 13px;
-      color: #64748b;
+    .hidden {
+      display: none !important;
     }
 
-    @media (max-width: 760px) {
-      body {
-        padding: 12px;
-        align-items: flex-start;
+    @media (max-width: 900px) {
+      .layout,
+      .workflow {
+        grid-template-columns: 1fr;
       }
 
-      main {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .app {
+        padding: 12px;
+      }
+
+      .manual-row,
+      .order-meta,
+      .photo-grid {
         grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
-  <main>
-    <section class="scanner">
-      <div class="video-wrap">
-        <video id="video" playsinline muted></video>
-        <div class="scan-box" aria-hidden="true"></div>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <h1>退货确认收货扫码 Demo</h1>
+        <p class="muted">扫码识别退货订单，拍照留存包裹外观，核对商品数量，再拍包裹内物品并完成退货收货。</p>
       </div>
-      <div class="controls">
-        <h1>Chrome 原生扫码识别 Demo</h1>
-        <p>这个页面只调用浏览器内置的 <code>BarcodeDetector</code>。如果当前 Chrome 不支持，会直接提示不可用。</p>
-        <span id="supportStatus" class="status">正在检测...</span>
-        <div class="button-row">
-          <button id="startBtn" type="button">开启摄像头并扫码</button>
-          <button id="stopBtn" class="secondary" type="button" disabled>停止</button>
-        </div>
-        <div class="hint">建议用 Android Chrome、ChromeOS 或 macOS Chrome 测试；Windows Chrome 很可能不支持原生识别。</div>
-      </div>
-    </section>
+      <span id="supportStatus" class="status">正在检测扫码能力...</span>
+    </header>
 
-    <section class="panel">
-      <h2>识别状态</h2>
-      <dl>
-        <div>
-          <dt>支持的码制</dt>
-          <dd id="formats">-</dd>
+    <nav class="workflow" aria-label="退货收货流程">
+      <div id="step-scan" class="step active"><strong>1. 扫订单</strong>识别退货单号</div>
+      <div id="step-outer" class="step"><strong>2. 拍外箱</strong>留存包裹照片</div>
+      <div id="step-confirm" class="step"><strong>3. 确认数量</strong>核对商品明细</div>
+      <div id="step-inner" class="step"><strong>4. 拍内件</strong>完成并继续</div>
+    </nav>
+
+    <main class="layout">
+      <section class="camera">
+        <div class="video-wrap">
+          <video id="video" playsinline muted></video>
+          <div id="scanFrame" class="scan-frame" aria-hidden="true"></div>
+          <div id="modeLabel" class="mode-label">扫码模式</div>
         </div>
-        <div>
-          <dt>最近结果</dt>
-          <dd id="lastResult">未开始</dd>
+        <div class="camera-actions">
+          <div class="button-row">
+            <button id="startBtn" type="button">开启摄像头扫码</button>
+            <button id="captureBtn" type="button" disabled>拍照</button>
+            <button id="stopBtn" class="secondary" type="button" disabled>关闭摄像头</button>
+            <button id="resetBtn" class="secondary" type="button">重新开始</button>
+          </div>
+          <div class="manual-row">
+            <input id="manualOrder" type="text" placeholder="手动输入测试单号，如 RMA-2026-001">
+            <button id="manualBtn" class="secondary" type="button">模拟扫码</button>
+          </div>
         </div>
-        <div>
-          <dt>日志</dt>
-          <dd><pre id="log"></pre></dd>
+      </section>
+
+      <section class="panel">
+        <div class="panel-body">
+          <h2 id="panelTitle">等待扫描退货订单</h2>
+          <p id="panelHint" class="muted">测试单号：RMA-2026-001、RMA-2026-002、RET-10003。也可以扫任意码，系统会生成一条待核验订单。</p>
+
+          <div id="orderBlock" class="hidden">
+            <div class="order-meta">
+              <div class="meta"><span>退货单号</span><strong id="orderNo">-</strong></div>
+              <div class="meta"><span>原订单号</span><strong id="sourceOrderNo">-</strong></div>
+              <div class="meta"><span>买家</span><strong id="buyerName">-</strong></div>
+              <div class="meta"><span>物流单号</span><strong id="trackingNo">-</strong></div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>商品</th>
+                  <th>SKU</th>
+                  <th>应收</th>
+                  <th>实收</th>
+                </tr>
+              </thead>
+              <tbody id="itemsBody"></tbody>
+            </table>
+          </div>
+
+          <div id="photoBlock" class="photo-grid hidden">
+            <figure id="outerFigure" class="hidden">
+              <img id="outerPhoto" alt="包裹外观照片">
+              <figcaption>包裹外观</figcaption>
+            </figure>
+            <figure id="innerFigure" class="hidden">
+              <img id="innerPhoto" alt="包裹内物品照片">
+              <figcaption>包裹内物品</figcaption>
+            </figure>
+          </div>
+
+          <div class="button-row">
+            <button id="confirmQtyBtn" type="button" disabled>确认数量，拍内件</button>
+            <button id="completeBtn" type="button" disabled>完成退货，继续下一个</button>
+          </div>
+
+          <h2 style="margin-top:18px;">操作日志</h2>
+          <div id="log" class="log"></div>
         </div>
-      </dl>
-    </section>
-  </main>
+      </section>
+    </main>
+  </div>
+
+  <canvas id="canvas" class="hidden"></canvas>
 
   <script>
+    const demoOrders = {
+      "RMA-2026-001": {
+        returnNo: "RMA-2026-001",
+        sourceOrderNo: "SO-10058291",
+        buyerName: "Lena Meyer",
+        trackingNo: "DHL-0039284751",
+        items: [
+          { name: "Wireless Barcode Scanner", sku: "SCAN-2D-BLK", expectedQty: 1 },
+          { name: "USB-C Charging Cable", sku: "CAB-C-1M", expectedQty: 1 }
+        ]
+      },
+      "RMA-2026-002": {
+        returnNo: "RMA-2026-002",
+        sourceOrderNo: "SO-10058344",
+        buyerName: "Marta Rossi",
+        trackingNo: "DPD-7783921045",
+        items: [
+          { name: "Thermal Label Printer", sku: "PRINT-4X6-EU", expectedQty: 1 }
+        ]
+      },
+      "RET-10003": {
+        returnNo: "RET-10003",
+        sourceOrderNo: "SO-10058402",
+        buyerName: "Tom Smith",
+        trackingNo: "EVRI-5529100388",
+        items: [
+          { name: "Inventory Handheld Terminal", sku: "PDA-WIFI-64", expectedQty: 2 },
+          { name: "Protective Case", sku: "CASE-PDA-RUG", expectedQty: 2 }
+        ]
+      }
+    };
+
+    const steps = ["scan", "outer", "confirm", "inner"];
     const video = document.querySelector("#video");
-    const startBtn = document.querySelector("#startBtn");
-    const stopBtn = document.querySelector("#stopBtn");
+    const canvas = document.querySelector("#canvas");
     const supportStatus = document.querySelector("#supportStatus");
-    const formatsEl = document.querySelector("#formats");
-    const lastResult = document.querySelector("#lastResult");
+    const scanFrame = document.querySelector("#scanFrame");
+    const modeLabel = document.querySelector("#modeLabel");
+    const startBtn = document.querySelector("#startBtn");
+    const captureBtn = document.querySelector("#captureBtn");
+    const stopBtn = document.querySelector("#stopBtn");
+    const resetBtn = document.querySelector("#resetBtn");
+    const manualOrder = document.querySelector("#manualOrder");
+    const manualBtn = document.querySelector("#manualBtn");
+    const panelTitle = document.querySelector("#panelTitle");
+    const panelHint = document.querySelector("#panelHint");
+    const orderBlock = document.querySelector("#orderBlock");
+    const orderNo = document.querySelector("#orderNo");
+    const sourceOrderNo = document.querySelector("#sourceOrderNo");
+    const buyerName = document.querySelector("#buyerName");
+    const trackingNo = document.querySelector("#trackingNo");
+    const itemsBody = document.querySelector("#itemsBody");
+    const photoBlock = document.querySelector("#photoBlock");
+    const outerFigure = document.querySelector("#outerFigure");
+    const innerFigure = document.querySelector("#innerFigure");
+    const outerPhoto = document.querySelector("#outerPhoto");
+    const innerPhoto = document.querySelector("#innerPhoto");
+    const confirmQtyBtn = document.querySelector("#confirmQtyBtn");
+    const completeBtn = document.querySelector("#completeBtn");
     const logEl = document.querySelector("#log");
 
     let detector = null;
     let stream = null;
-    let scanning = false;
-    let resultHandled = false;
     let rafId = 0;
+    let scanning = false;
+    let currentStep = "scan";
+    let currentOrder = null;
+    let outerPhotoData = "";
+    let innerPhotoData = "";
 
     const preferredFormats = [
       "qr_code",
@@ -269,39 +514,99 @@
       logEl.textContent = `[${time}] ${message}\n${logEl.textContent}`;
     }
 
-    function setStatus(text, className) {
+    function setSupport(text, className) {
       supportStatus.textContent = text;
       supportStatus.className = `status ${className || ""}`.trim();
     }
 
+    function setStep(step) {
+      currentStep = step;
+      for (const item of steps) {
+        document.querySelector(`#step-${item}`).classList.toggle("active", item === step);
+      }
+
+      const labels = {
+        scan: "扫码模式",
+        outer: "拍包裹外观",
+        confirm: "确认商品数量",
+        inner: "拍包裹内物品"
+      };
+
+      modeLabel.textContent = labels[step];
+      scanFrame.classList.toggle("hidden", step !== "scan");
+      captureBtn.disabled = !(step === "outer" || step === "inner") || !stream;
+      confirmQtyBtn.disabled = step !== "confirm";
+      completeBtn.disabled = step !== "inner" || !innerPhotoData;
+    }
+
+    function normalizeOrderCode(value) {
+      const text = String(value || "").trim().toUpperCase();
+      const knownKey = Object.keys(demoOrders).find((key) => text.includes(key));
+      return knownKey || text;
+    }
+
+    function buildFallbackOrder(rawCode) {
+      const code = normalizeOrderCode(rawCode) || `RMA-${Date.now()}`;
+      return {
+        returnNo: code,
+        sourceOrderNo: "待匹配",
+        buyerName: "待核验",
+        trackingNo: "待核验",
+        items: [
+          { name: "扫码后生成的待核验商品", sku: "UNKNOWN-SKU", expectedQty: 1 }
+        ]
+      };
+    }
+
+    function findOrder(rawCode) {
+      const code = normalizeOrderCode(rawCode);
+      return structuredClone(demoOrders[code] || buildFallbackOrder(code));
+    }
+
+    function renderOrder() {
+      if (!currentOrder) return;
+      orderNo.textContent = currentOrder.returnNo;
+      sourceOrderNo.textContent = currentOrder.sourceOrderNo;
+      buyerName.textContent = currentOrder.buyerName;
+      trackingNo.textContent = currentOrder.trackingNo;
+      itemsBody.innerHTML = currentOrder.items.map((item, index) => `
+        <tr>
+          <td>${item.name}</td>
+          <td>${item.sku}</td>
+          <td>${item.expectedQty}</td>
+          <td class="qty">
+            <input class="qty-input" type="number" min="0" step="1" value="${item.receivedQty ?? item.expectedQty}" data-index="${index}" aria-label="${item.sku} 实收数量">
+          </td>
+        </tr>
+      `).join("");
+      orderBlock.classList.remove("hidden");
+    }
+
     async function checkSupport() {
       if (!("BarcodeDetector" in window)) {
-        setStatus("当前浏览器不支持 BarcodeDetector", "bad");
+        setSupport("当前浏览器不支持原生扫码", "bad");
         startBtn.disabled = true;
-        log("window.BarcodeDetector 不存在");
+        log("BarcodeDetector 不可用，可用手动输入测试单号继续体验流程");
         return;
       }
 
       try {
         const supportedFormats = await BarcodeDetector.getSupportedFormats();
-        formatsEl.textContent = supportedFormats.length ? supportedFormats.join(", ") : "浏览器未返回支持列表";
-
         const usableFormats = preferredFormats.filter((format) => supportedFormats.includes(format));
         detector = new BarcodeDetector({
           formats: usableFormats.length ? usableFormats : supportedFormats
         });
-
-        setStatus("支持 BarcodeDetector", "ok");
-        log(`原生识别可用，支持 ${supportedFormats.length} 种码制`);
+        setSupport(`支持原生扫码：${supportedFormats.length} 种码制`, "ok");
+        log(`BarcodeDetector 已就绪：${supportedFormats.join(", ")}`);
       } catch (error) {
-        setStatus("BarcodeDetector 初始化失败", "bad");
+        setSupport("扫码初始化失败", "bad");
         startBtn.disabled = true;
         log(error.message || String(error));
       }
     }
 
-    async function startScanner() {
-      if (!detector) return;
+    async function ensureCamera() {
+      if (stream) return true;
 
       try {
         stream = await navigator.mediaDevices.getUserMedia({
@@ -312,21 +617,38 @@
           },
           audio: false
         });
-
         video.srcObject = stream;
         await video.play();
-
-        scanning = true;
-        resultHandled = false;
-        startBtn.disabled = true;
         stopBtn.disabled = false;
-        lastResult.textContent = "扫描中...";
+        captureBtn.disabled = !(currentStep === "outer" || currentStep === "inner");
         log("摄像头已开启");
-        scanLoop();
+        return true;
       } catch (error) {
         log(`摄像头开启失败：${error.message || String(error)}`);
-        lastResult.textContent = "摄像头开启失败，请检查权限或是否在 localhost/HTTPS 下访问";
+        alert("摄像头开启失败，请检查浏览器权限，并确认使用 HTTPS 或 localhost 访问。");
+        return false;
       }
+    }
+
+    async function startScanner() {
+      if (!detector) {
+        alert("当前浏览器不支持 BarcodeDetector，请用手动输入模拟流程，或换 Android Chrome / macOS Chrome 测试。");
+        return;
+      }
+
+      resetWorkflow(false);
+      if (!(await ensureCamera())) return;
+      beginScanning("开始扫描退货订单");
+    }
+
+    function beginScanning(logMessage) {
+      scanning = true;
+      startBtn.disabled = true;
+      setStep("scan");
+      panelTitle.textContent = "正在扫描退货订单";
+      panelHint.textContent = "请将退货单、面单或包裹上的二维码/条码放入绿色框内。";
+      log(logMessage);
+      scanLoop();
     }
 
     async function scanLoop() {
@@ -334,41 +656,157 @@
 
       try {
         const barcodes = await detector.detect(video);
-        if (barcodes.length > 0 && !resultHandled) {
-          resultHandled = true;
-          const lines = barcodes.map((barcode) => `${barcode.format}: ${barcode.rawValue}`);
-          const message = lines.join(" | ");
-          lastResult.textContent = message;
-          log(`识别到 ${barcodes.length} 个码：${lines.join(" ; ")}`);
-          stopScanner();
-          alert(`识别结果：\n${message}`);
+        if (barcodes.length > 0) {
+          const rawValue = barcodes[0].rawValue;
+          scanning = false;
+          cancelAnimationFrame(rafId);
+          handleOrderDetected(rawValue);
           return;
         }
       } catch (error) {
-        log(`识别失败：${error.message || String(error)}`);
+        log(`扫码失败：${error.message || String(error)}`);
       }
 
       rafId = requestAnimationFrame(scanLoop);
     }
 
-    function stopScanner() {
+    async function handleOrderDetected(rawValue) {
+      currentOrder = findOrder(rawValue);
+      outerPhotoData = "";
+      innerPhotoData = "";
+      renderOrder();
+      photoBlock.classList.add("hidden");
+      outerFigure.classList.add("hidden");
+      innerFigure.classList.add("hidden");
+      panelTitle.textContent = "已识别订单，请拍包裹外观";
+      panelHint.textContent = `识别结果：${rawValue}。请把包裹完整放入画面后拍照。`;
+      startBtn.disabled = false;
+      setStep("outer");
+      await ensureCamera();
+      log(`识别到退货单 ${currentOrder.returnNo}`);
+    }
+
+    function capturePhoto() {
+      if (!stream || !video.videoWidth) {
+        alert("摄像头尚未就绪。");
+        return;
+      }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.86);
+
+      if (currentStep === "outer") {
+        outerPhotoData = dataUrl;
+        outerPhoto.src = dataUrl;
+        photoBlock.classList.remove("hidden");
+        outerFigure.classList.remove("hidden");
+        panelTitle.textContent = "确认退货商品数量";
+        panelHint.textContent = "核对实收数量，必要时调整数量，然后进入内件拍照。";
+        setStep("confirm");
+        log("已拍摄包裹外观");
+        return;
+      }
+
+      if (currentStep === "inner") {
+        innerPhotoData = dataUrl;
+        innerPhoto.src = dataUrl;
+        photoBlock.classList.remove("hidden");
+        innerFigure.classList.remove("hidden");
+        completeBtn.disabled = false;
+        panelTitle.textContent = "内件照片已留存";
+        panelHint.textContent = "确认照片和数量无误后，完成退货收货并继续下一个。";
+        log("已拍摄包裹内物品");
+      }
+    }
+
+    function confirmQuantities() {
+      if (!currentOrder) return;
+
+      const inputs = document.querySelectorAll(".qty-input");
+      for (const input of inputs) {
+        const index = Number(input.dataset.index);
+        currentOrder.items[index].receivedQty = Number(input.value || 0);
+      }
+
+      panelTitle.textContent = "请拍包裹内物品";
+      panelHint.textContent = "打开包裹后，将实物和随附配件放入画面，拍照留存。";
+      setStep("inner");
+      log(`已确认数量：${currentOrder.items.map((item) => `${item.sku}=${item.receivedQty}`).join(", ")}`);
+    }
+
+    function completeReturn() {
+      if (!currentOrder || !innerPhotoData) return;
+
+      const summary = currentOrder.items
+        .map((item) => `${item.sku} 实收 ${item.receivedQty ?? item.expectedQty}/${item.expectedQty}`)
+        .join("；");
+
+      alert(`退货收货完成\n${currentOrder.returnNo}\n${summary}`);
+      log(`退货完成：${currentOrder.returnNo}`);
+      resetWorkflow(true);
+      if (detector && stream) {
+        beginScanning("继续扫描下一个退货订单");
+      }
+    }
+
+    function resetWorkflow(keepCamera) {
       scanning = false;
       cancelAnimationFrame(rafId);
+      currentOrder = null;
+      outerPhotoData = "";
+      innerPhotoData = "";
+      manualOrder.value = "";
+      panelTitle.textContent = "等待扫描退货订单";
+      panelHint.textContent = "测试单号：RMA-2026-001、RMA-2026-002、RET-10003。也可以扫任意码，系统会生成一条待核验订单。";
+      orderBlock.classList.add("hidden");
+      photoBlock.classList.add("hidden");
+      outerFigure.classList.add("hidden");
+      innerFigure.classList.add("hidden");
+      outerPhoto.removeAttribute("src");
+      innerPhoto.removeAttribute("src");
+      itemsBody.innerHTML = "";
+      startBtn.disabled = !detector;
+      confirmQtyBtn.disabled = true;
+      completeBtn.disabled = true;
+      setStep("scan");
 
+      if (!keepCamera) {
+        stopCamera();
+      }
+    }
+
+    function stopCamera() {
+      scanning = false;
+      cancelAnimationFrame(rafId);
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
         stream = null;
       }
-
       video.srcObject = null;
-      startBtn.disabled = !detector;
       stopBtn.disabled = true;
-      log("已停止扫描");
+      captureBtn.disabled = true;
+      startBtn.disabled = !detector;
+      log("摄像头已关闭");
     }
 
     startBtn.addEventListener("click", startScanner);
-    stopBtn.addEventListener("click", stopScanner);
-    window.addEventListener("beforeunload", stopScanner);
+    captureBtn.addEventListener("click", capturePhoto);
+    stopBtn.addEventListener("click", stopCamera);
+    resetBtn.addEventListener("click", () => resetWorkflow(false));
+    confirmQtyBtn.addEventListener("click", confirmQuantities);
+    completeBtn.addEventListener("click", completeReturn);
+    manualBtn.addEventListener("click", () => {
+      const value = manualOrder.value.trim();
+      if (!value) {
+        alert("请输入测试单号。");
+        return;
+      }
+      handleOrderDetected(value);
+    });
+    window.addEventListener("beforeunload", stopCamera);
 
     checkSupport();
   </script>
