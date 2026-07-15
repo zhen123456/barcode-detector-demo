@@ -611,7 +611,6 @@
         <span data-progress="outer"></span>
         <span data-progress="inner"></span>
         <span data-progress="confirm"></span>
-        <span data-progress="done"></span>
       </div>
     </header>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -681,19 +680,7 @@
         </div>
       </section>
 
-      <section id="screen-done" class="screen content-screen">
-        <div class="success">
-          <div>
-            <div class="success-mark">✓</div>
-            <h2 class="content-title">退货已完成</h2>
-            <p id="doneSummary" class="content-hint">已完成确认收货。</p>
-          </div>
-        </div>
-        <details>
-          <summary>操作日志</summary>
-          <div id="log" class="log"></div>
-        </details>
-      </section>
+      <div id="log" class="log hidden"></div>
     </main>
 
     <footer id="bottomBar" class="bottom-bar">
@@ -737,7 +724,7 @@
       }
     };
 
-    const stepOrder = ["scan", "outer", "inner", "confirm", "done"];
+    const stepOrder = ["scan", "outer", "inner", "confirm"];
     const app = document.querySelector("#app");
     const video = document.querySelector("#video");
     const outerMirror = document.querySelector("#outerMirror");
@@ -759,7 +746,6 @@
     const innerEvidence = document.querySelector("#innerEvidence");
     const outerPreviewCard = document.querySelector("#outerPreviewCard");
     const innerPreviewCard = document.querySelector("#innerPreviewCard");
-    const doneSummary = document.querySelector("#doneSummary");
     const logEl = document.querySelector("#log");
     const bottomBar = document.querySelector("#bottomBar");
     const primaryBtn = document.querySelector("#primaryBtn");
@@ -829,7 +815,7 @@
         item.classList.toggle("done", index < activeIndex);
       });
 
-      app.classList.toggle("content-mode", step === "confirm" || step === "done");
+      app.classList.toggle("content-mode", step === "confirm");
       updateBottomBar();
       window.scrollTo({ top: 0, behavior: "instant" });
     }
@@ -864,8 +850,8 @@
         return;
       }
 
-      setButton(primaryBtn, "next", "继续下一个");
-      showSecondary("关闭摄像头", stopCamera);
+      setButton(primaryBtn, "check", "确认数量，完成退货");
+      showSecondary("返回内件", () => showScreen("inner"));
     }
 
     function showSecondary(text, handler) {
@@ -1062,9 +1048,15 @@
       const summary = currentOrder.items
         .map((item) => `${item.sku} 实收 ${item.receivedQty ?? item.expectedQty}/${item.expectedQty}`)
         .join("；");
-      doneSummary.textContent = `${currentOrder.returnNo} 已完成。${summary}`;
       log(`退货完成：${currentOrder.returnNo}`);
-      showScreen("done");
+      alert(`退货收货完成\n${currentOrder.returnNo}\n${summary}`);
+      resetWorkflow({ keepCamera: true, silent: true });
+      if (detector && stream) {
+        scanning = true;
+        updateBottomBar();
+        log("继续扫描下一个退货订单");
+        scanLoop();
+      }
     }
 
     function resetWorkflow(options = {}) {
@@ -1121,13 +1113,6 @@
       if (currentStep === "confirm") {
         completeReturn();
         return;
-      }
-      resetWorkflow({ keepCamera: true });
-      if (detector && stream) {
-        scanning = true;
-        updateBottomBar();
-        log("继续扫描下一个退货订单");
-        scanLoop();
       }
     });
 
