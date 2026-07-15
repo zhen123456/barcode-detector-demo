@@ -8,7 +8,7 @@
     :root {
       color-scheme: light;
       font-family: Arial, "Microsoft YaHei", sans-serif;
-      background: #f4f6f8;
+      background: #0b1220;
       color: #172033;
     }
 
@@ -21,7 +21,7 @@
     body {
       margin: 0;
       min-height: 100%;
-      background: #f4f6f8;
+      background: #0b1220;
     }
 
     body {
@@ -35,58 +35,66 @@
 
     button {
       width: 100%;
-      min-height: 48px;
+      min-height: 50px;
       border: 0;
-      border-radius: 8px;
-      padding: 0 16px;
-      color: #fff;
-      background: #0f62c9;
+      border-radius: 999px;
+      padding: 0 18px;
+      color: #172033;
+      background: rgba(255, 255, 255, 0.94);
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
     }
 
     button.secondary {
-      color: #1f2937;
-      background: #e7edf5;
+      color: #fff;
+      background: rgba(15, 23, 42, 0.54);
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      backdrop-filter: blur(10px);
     }
 
-    button.ghost {
-      color: #3b4a5f;
-      background: transparent;
-      border: 1px solid #d7dee9;
+    button.blue {
+      color: #fff;
+      background: #0f62c9;
     }
 
     button:disabled {
-      opacity: 0.5;
+      opacity: 0.52;
       cursor: not-allowed;
     }
 
     input {
       width: 100%;
       min-height: 46px;
-      border: 1px solid #cfd8e3;
-      border-radius: 8px;
-      padding: 0 12px;
-      background: #fff;
-      color: #172033;
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      border-radius: 999px;
+      padding: 0 14px;
+      color: #fff;
+      background: rgba(15, 23, 42, 0.54);
+      backdrop-filter: blur(10px);
       font-size: 15px;
+      outline: none;
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.72);
     }
 
     .app {
       min-height: 100dvh;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
+      background: #0b1220;
     }
 
     .topbar {
-      position: sticky;
+      position: fixed;
       top: 0;
-      z-index: 20;
+      left: 0;
+      right: 0;
+      z-index: 30;
       padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
-      background: rgba(244, 246, 248, 0.96);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid #dfe6ef;
+      color: #fff;
+      pointer-events: none;
     }
 
     .topline {
@@ -101,28 +109,28 @@
       margin: 0;
       font-size: 17px;
       line-height: 1.2;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.42);
     }
 
     .support {
-      max-width: 48%;
+      max-width: 50%;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       border-radius: 999px;
       padding: 5px 9px;
-      color: #46566f;
-      background: #e7edf5;
+      color: #fff;
+      background: rgba(15, 23, 42, 0.62);
+      backdrop-filter: blur(10px);
       font-size: 12px;
     }
 
     .support.ok {
-      color: #166534;
-      background: #dcfce7;
+      color: #dcfce7;
     }
 
     .support.bad {
-      color: #991b1b;
-      background: #fee2e2;
+      color: #fecaca;
     }
 
     .progress {
@@ -134,59 +142,35 @@
     .progress span {
       height: 5px;
       border-radius: 999px;
-      background: #d9e1ec;
+      background: rgba(255, 255, 255, 0.28);
     }
 
     .progress span.active,
     .progress span.done {
-      background: #0f62c9;
+      background: #fff;
     }
 
     .screen {
       display: none;
-      min-width: 0;
-      padding: 14px;
-      padding-bottom: 96px;
+      min-height: 100dvh;
+      background: #f4f6f8;
     }
 
     .screen.active {
       display: block;
     }
 
-    .page-title {
-      margin: 4px 0 6px;
-      font-size: 24px;
-      line-height: 1.18;
-      letter-spacing: 0;
-    }
-
-    .hint {
-      margin: 0 0 14px;
-      color: #5f6f85;
-      font-size: 14px;
-      line-height: 1.55;
-    }
-
-    .camera-card,
-    .card,
-    .item-card,
-    .photo-card {
-      border: 1px solid #dce4ef;
-      border-radius: 10px;
-      background: #fff;
-      box-shadow: 0 10px 24px rgba(20, 38, 75, 0.06);
-    }
-
-    .camera-card {
+    .camera-screen {
+      position: relative;
       overflow: hidden;
+      background: #0b1220;
+      color: #fff;
     }
 
     .video-wrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 3 / 4;
-      max-height: 58dvh;
-      background: #101828;
+      position: absolute;
+      inset: 0;
+      background: #0b1220;
     }
 
     video {
@@ -196,41 +180,123 @@
       object-fit: cover;
     }
 
-    .scan-frame {
+    .video-dim {
       position: absolute;
-      left: 13%;
-      right: 13%;
-      top: 24%;
-      height: 34%;
-      border: 2px solid #22c55e;
-      border-radius: 12px;
-      box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.24);
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(5, 10, 20, 0.72) 0%,
+        rgba(5, 10, 20, 0.12) 34%,
+        rgba(5, 10, 20, 0.10) 58%,
+        rgba(5, 10, 20, 0.72) 100%
+      );
       pointer-events: none;
     }
 
-    .camera-tip {
+    .scan-frame {
       position: absolute;
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
-      border-radius: 999px;
-      padding: 8px 10px;
+      left: 10%;
+      right: 10%;
+      top: 30%;
+      height: 26%;
+      border: 2px solid rgba(255, 255, 255, 0.94);
+      border-radius: 16px;
+      box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.14), 0 0 22px rgba(255, 255, 255, 0.24);
+      pointer-events: none;
+    }
+
+    .camera-copy {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      top: calc(76px + env(safe-area-inset-top));
+      z-index: 5;
+      padding: 14px;
+      border-radius: 14px;
       color: #fff;
-      background: rgba(15, 23, 42, 0.78);
-      text-align: center;
-      font-size: 13px;
+      background: rgba(15, 23, 42, 0.46);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+    }
+
+    .camera-title {
+      margin: 0 0 6px;
+      font-size: 24px;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    .camera-hint {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 14px;
+      line-height: 1.48;
     }
 
     .manual {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: calc(78px + env(safe-area-inset-bottom));
+      z-index: 8;
       display: grid;
       gap: 8px;
-      padding: 12px;
-      border-top: 1px solid #e5ebf3;
     }
 
-    .meta-grid {
-      display: grid;
-      gap: 10px;
+    .photo-preview {
+      position: absolute;
+      right: 14px;
+      bottom: calc(88px + env(safe-area-inset-bottom));
+      z-index: 8;
+      width: 96px;
+      border: 1px solid rgba(255, 255, 255, 0.42);
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.52);
+      backdrop-filter: blur(10px);
+    }
+
+    .photo-preview img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+    }
+
+    .photo-preview span {
+      display: block;
+      padding: 5px 6px;
+      color: #fff;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .content-screen {
+      min-height: 100dvh;
+      padding: calc(76px + env(safe-area-inset-top)) 14px calc(88px + env(safe-area-inset-bottom));
+      background: #f4f6f8;
+    }
+
+    .content-title {
+      margin: 4px 0 6px;
+      color: #172033;
+      font-size: 24px;
+      line-height: 1.18;
+    }
+
+    .content-hint {
+      margin: 0 0 14px;
+      color: #5f6f85;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .card,
+    .item-card {
+      border: 1px solid #dce4ef;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 10px 24px rgba(20, 38, 75, 0.06);
     }
 
     .meta {
@@ -243,8 +309,7 @@
     }
 
     .meta span,
-    .item-sku,
-    .photo-caption {
+    .item-sku {
       display: block;
       margin-bottom: 4px;
       color: #64748b;
@@ -267,6 +332,7 @@
 
     .item-name {
       margin: 0 0 6px;
+      color: #172033;
       font-size: 15px;
       font-weight: 700;
       line-height: 1.35;
@@ -278,6 +344,7 @@
       gap: 10px;
       align-items: center;
       margin-top: 10px;
+      color: #344054;
     }
 
     .qty-control {
@@ -296,6 +363,7 @@
       padding: 0;
       color: #172033;
       background: #eef3f8;
+      box-shadow: none;
       font-size: 20px;
     }
 
@@ -304,32 +372,31 @@
       border: 0;
       border-radius: 0;
       padding: 0;
+      color: #172033;
+      background: #fff;
       text-align: center;
       font-weight: 700;
     }
 
-    .photo-card {
-      overflow: hidden;
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
       margin-top: 12px;
     }
 
-    .photo-card img {
-      display: block;
+    .evidence-grid img {
       width: 100%;
       aspect-ratio: 4 / 3;
       object-fit: cover;
+      border-radius: 10px;
       background: #e7edf5;
-    }
-
-    .photo-caption {
-      margin: 0;
-      padding: 9px 10px;
     }
 
     .success {
       display: grid;
       place-items: center;
-      min-height: 44dvh;
+      min-height: 42dvh;
       text-align: center;
     }
 
@@ -348,9 +415,6 @@
 
     details {
       margin-top: 12px;
-    }
-
-    summary {
       color: #64748b;
       font-size: 13px;
     }
@@ -373,18 +437,70 @@
       left: 0;
       right: 0;
       bottom: 0;
-      z-index: 30;
+      z-index: 40;
       display: grid;
       grid-template-columns: 1fr;
       gap: 8px;
       padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
-      border-top: 1px solid #dfe6ef;
-      background: rgba(255, 255, 255, 0.97);
-      box-shadow: 0 -12px 26px rgba(20, 38, 75, 0.08);
+      pointer-events: auto;
     }
 
     .bottom-bar.two {
       grid-template-columns: 0.85fr 1.15fr;
+    }
+
+    .content-mode .topbar {
+      color: #172033;
+      background: rgba(244, 246, 248, 0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #dfe6ef;
+      pointer-events: none;
+    }
+
+    .content-mode h1 {
+      text-shadow: none;
+    }
+
+    .content-mode .support {
+      color: #46566f;
+      background: #e7edf5;
+    }
+
+    .content-mode .support.ok {
+      color: #166534;
+      background: #dcfce7;
+    }
+
+    .content-mode .support.bad {
+      color: #991b1b;
+      background: #fee2e2;
+    }
+
+    .content-mode .progress span {
+      background: #d9e1ec;
+    }
+
+    .content-mode .progress span.active,
+    .content-mode .progress span.done {
+      background: #0f62c9;
+    }
+
+    .content-mode .bottom-bar {
+      background: rgba(255, 255, 255, 0.97);
+      border-top: 1px solid #dfe6ef;
+      box-shadow: 0 -12px 26px rgba(20, 38, 75, 0.08);
+    }
+
+    .content-mode .bottom-bar button:not(.secondary) {
+      color: #fff;
+      background: #0f62c9;
+    }
+
+    .content-mode .bottom-bar button.secondary {
+      color: #1f2937;
+      background: #e7edf5;
+      border-color: transparent;
+      box-shadow: none;
     }
 
     .hidden {
@@ -396,11 +512,11 @@
         width: 430px;
         min-height: 100dvh;
         margin: 0 auto;
-        border-left: 1px solid #dfe6ef;
-        border-right: 1px solid #dfe6ef;
-        background: #f4f6f8;
+        position: relative;
+        overflow: hidden;
       }
 
+      .topbar,
       .bottom-bar {
         left: 50%;
         width: 430px;
@@ -410,7 +526,7 @@
   </style>
 </head>
 <body>
-  <div class="app">
+  <div id="app" class="app">
     <header class="topbar">
       <div class="topline">
         <h1>退货收货</h1>
@@ -419,81 +535,81 @@
       <div class="progress" aria-label="流程进度">
         <span data-progress="scan" class="active"></span>
         <span data-progress="outer"></span>
-        <span data-progress="confirm"></span>
         <span data-progress="inner"></span>
+        <span data-progress="confirm"></span>
         <span data-progress="done"></span>
       </div>
     </header>
 
     <main>
-      <section id="screen-scan" class="screen active">
-        <h2 class="page-title">扫描退货订单</h2>
-        <p class="hint">对准退货单、面单或包裹上的二维码/条码。识别成功后自动进入拍外箱。</p>
-        <div class="camera-card">
-          <div class="video-wrap">
-            <video id="video" playsinline muted></video>
-            <div id="scanFrame" class="scan-frame" aria-hidden="true"></div>
-            <div id="cameraTip" class="camera-tip">摄像头未开启</div>
-          </div>
-          <div class="manual">
-            <input id="manualOrder" type="text" placeholder="手动输入测试单号：RMA-2026-001">
-            <button id="manualBtn" class="secondary" type="button">模拟扫码</button>
-          </div>
+      <section id="screen-scan" class="screen camera-screen active">
+        <div class="video-wrap">
+          <video id="video" playsinline muted></video>
+          <div class="video-dim"></div>
+          <div id="scanFrame" class="scan-frame" aria-hidden="true"></div>
         </div>
-        <details>
-          <summary>测试单号</summary>
-          <p class="hint">RMA-2026-001、RMA-2026-002、RET-10003</p>
-        </details>
+        <div class="camera-copy">
+          <h2 class="camera-title">扫描退货订单</h2>
+          <p id="cameraTip" class="camera-hint">对准退货单、面单或包裹上的二维码/条码。</p>
+        </div>
+        <div class="manual">
+          <input id="manualOrder" type="text" placeholder="手动输入测试单号：RMA-2026-001">
+          <button id="manualBtn" class="secondary" type="button">模拟扫码</button>
+        </div>
       </section>
 
-      <section id="screen-outer" class="screen">
-        <h2 class="page-title">拍包裹外观</h2>
-        <p class="hint">先保留外箱、面单和破损情况。照片会作为退货收货凭证。</p>
-        <div class="camera-card">
-          <div class="video-wrap">
-            <video id="outerMirror" playsinline muted></video>
-            <div class="camera-tip">将完整包裹放入画面</div>
-          </div>
+      <section id="screen-outer" class="screen camera-screen">
+        <div class="video-wrap">
+          <video id="outerMirror" playsinline muted></video>
+          <div class="video-dim"></div>
         </div>
-        <div id="outerPreviewCard" class="photo-card hidden">
+        <div class="camera-copy">
+          <h2 class="camera-title">拍包裹外观</h2>
+          <p class="camera-hint">把外箱、面单和破损情况完整放入画面。</p>
+        </div>
+        <div id="outerPreviewCard" class="photo-preview hidden">
           <img id="outerPhoto" alt="包裹外观照片">
-          <p class="photo-caption">包裹外观照片</p>
+          <span>外观照片</span>
         </div>
       </section>
 
-      <section id="screen-confirm" class="screen">
-        <h2 class="page-title">确认收货数量</h2>
-        <p class="hint">核对退货订单和商品明细，确认实际收到的数量。</p>
-        <div class="card meta-grid">
+      <section id="screen-inner" class="screen camera-screen">
+        <div class="video-wrap">
+          <video id="innerMirror" playsinline muted></video>
+          <div class="video-dim"></div>
+        </div>
+        <div class="camera-copy">
+          <h2 class="camera-title">拍包裹内物品</h2>
+          <p class="camera-hint">打开包裹后，把商品和配件一起拍清楚。</p>
+        </div>
+        <div id="innerPreviewCard" class="photo-preview hidden">
+          <img id="innerPhoto" alt="包裹内物品照片">
+          <span>内件照片</span>
+        </div>
+      </section>
+
+      <section id="screen-confirm" class="screen content-screen">
+        <h2 class="content-title">确认收货数量</h2>
+        <p class="content-hint">核对退货订单和商品明细，确认实际收到的数量。</p>
+        <div class="card">
           <div class="meta"><span>退货单号</span><strong id="orderNo">-</strong></div>
           <div class="meta"><span>原订单号</span><strong id="sourceOrderNo">-</strong></div>
           <div class="meta"><span>买家</span><strong id="buyerName">-</strong></div>
           <div class="meta"><span>物流单号</span><strong id="trackingNo">-</strong></div>
         </div>
         <div id="itemsList" class="item-list" style="margin-top:12px;"></div>
-      </section>
-
-      <section id="screen-inner" class="screen">
-        <h2 class="page-title">拍包裹内物品</h2>
-        <p class="hint">打开包裹后，把商品和配件一起放入画面，拍照后即可完成退货。</p>
-        <div class="camera-card">
-          <div class="video-wrap">
-            <video id="innerMirror" playsinline muted></video>
-            <div class="camera-tip">拍清楚内件和配件</div>
-          </div>
-        </div>
-        <div id="innerPreviewCard" class="photo-card hidden">
-          <img id="innerPhoto" alt="包裹内物品照片">
-          <p class="photo-caption">包裹内物品照片</p>
+        <div class="evidence-grid">
+          <img id="outerEvidence" alt="外箱照片凭证">
+          <img id="innerEvidence" alt="内件照片凭证">
         </div>
       </section>
 
-      <section id="screen-done" class="screen">
+      <section id="screen-done" class="screen content-screen">
         <div class="success">
           <div>
             <div class="success-mark">✓</div>
-            <h2 class="page-title">退货已完成</h2>
-            <p id="doneSummary" class="hint">已完成确认收货。</p>
+            <h2 class="content-title">退货已完成</h2>
+            <p id="doneSummary" class="content-hint">已完成确认收货。</p>
           </div>
         </div>
         <details>
@@ -505,7 +621,7 @@
 
     <footer id="bottomBar" class="bottom-bar">
       <button id="primaryBtn" type="button">开启摄像头扫码</button>
-      <button id="secondaryBtn" class="ghost hidden" type="button">重新开始</button>
+      <button id="secondaryBtn" class="secondary hidden" type="button">重新开始</button>
     </footer>
   </div>
 
@@ -544,7 +660,8 @@
       }
     };
 
-    const stepOrder = ["scan", "outer", "confirm", "inner", "done"];
+    const stepOrder = ["scan", "outer", "inner", "confirm", "done"];
+    const app = document.querySelector("#app");
     const video = document.querySelector("#video");
     const outerMirror = document.querySelector("#outerMirror");
     const innerMirror = document.querySelector("#innerMirror");
@@ -560,6 +677,8 @@
     const itemsList = document.querySelector("#itemsList");
     const outerPhoto = document.querySelector("#outerPhoto");
     const innerPhoto = document.querySelector("#innerPhoto");
+    const outerEvidence = document.querySelector("#outerEvidence");
+    const innerEvidence = document.querySelector("#innerEvidence");
     const outerPreviewCard = document.querySelector("#outerPreviewCard");
     const innerPreviewCard = document.querySelector("#innerPreviewCard");
     const doneSummary = document.querySelector("#doneSummary");
@@ -578,19 +697,8 @@
     let innerPhotoData = "";
 
     const preferredFormats = [
-      "qr_code",
-      "aztec",
-      "code_128",
-      "code_39",
-      "code_93",
-      "codabar",
-      "data_matrix",
-      "ean_13",
-      "ean_8",
-      "itf",
-      "pdf417",
-      "upc_a",
-      "upc_e"
+      "qr_code", "aztec", "code_128", "code_39", "code_93", "codabar",
+      "data_matrix", "ean_13", "ean_8", "itf", "pdf417", "upc_a", "upc_e"
     ];
 
     function log(message) {
@@ -615,6 +723,7 @@
         item.classList.toggle("done", index < activeIndex);
       });
 
+      app.classList.toggle("content-mode", step === "confirm" || step === "done");
       updateBottomBar();
       window.scrollTo({ top: 0, behavior: "instant" });
     }
@@ -637,15 +746,15 @@
         return;
       }
 
-      if (currentStep === "confirm") {
-        primaryBtn.textContent = "确认数量，下一步";
-        showSecondary("重新拍外箱", () => showScreen("outer"));
+      if (currentStep === "inner") {
+        primaryBtn.textContent = innerPhotoData ? "重新拍内件" : "拍包裹内物品";
+        showSecondary("返回外箱", () => showScreen("outer"));
         return;
       }
 
-      if (currentStep === "inner") {
-        primaryBtn.textContent = innerPhotoData ? "完成退货" : "拍包裹内物品";
-        showSecondary("返回数量", () => showScreen("confirm"));
+      if (currentStep === "confirm") {
+        primaryBtn.textContent = "确认数量，完成退货";
+        showSecondary("返回内件", () => showScreen("inner"));
         return;
       }
 
@@ -694,6 +803,8 @@
       sourceOrderNo.textContent = currentOrder.sourceOrderNo;
       buyerName.textContent = currentOrder.buyerName;
       trackingNo.textContent = currentOrder.trackingNo;
+      outerEvidence.src = outerPhotoData;
+      innerEvidence.src = innerPhotoData;
       itemsList.innerHTML = currentOrder.items.map((item, index) => `
         <article class="item-card">
           <p class="item-name">${item.name}</p>
@@ -794,7 +905,6 @@
       currentOrder = findOrder(rawValue);
       outerPhotoData = "";
       innerPhotoData = "";
-      renderOrder();
       outerPreviewCard.classList.add("hidden");
       innerPreviewCard.classList.add("hidden");
       showScreen("outer");
@@ -839,7 +949,7 @@
     }
 
     function completeReturn() {
-      if (!currentOrder || !innerPhotoData) return;
+      if (!currentOrder || !outerPhotoData || !innerPhotoData) return;
       saveQuantities();
       const summary = currentOrder.items
         .map((item) => `${item.sku} 实收 ${item.receivedQty ?? item.expectedQty}/${item.expectedQty}`)
@@ -860,6 +970,8 @@
       itemsList.innerHTML = "";
       outerPhoto.removeAttribute("src");
       innerPhoto.removeAttribute("src");
+      outerEvidence.removeAttribute("src");
+      innerEvidence.removeAttribute("src");
       outerPreviewCard.classList.add("hidden");
       innerPreviewCard.classList.add("hidden");
       showScreen("scan");
@@ -888,20 +1000,17 @@
         return;
       }
       if (currentStep === "outer") {
-        if (capturePhoto("outer")) showScreen("confirm");
-        return;
-      }
-      if (currentStep === "confirm") {
-        saveQuantities();
-        showScreen("inner");
+        if (capturePhoto("outer")) showScreen("inner");
         return;
       }
       if (currentStep === "inner") {
-        if (!innerPhotoData) {
-          capturePhoto("inner");
-          updateBottomBar();
-          return;
+        if (capturePhoto("inner")) {
+          renderOrder();
+          showScreen("confirm");
         }
+        return;
+      }
+      if (currentStep === "confirm") {
         completeReturn();
         return;
       }
