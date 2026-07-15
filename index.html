@@ -219,6 +219,27 @@
       pointer-events: none;
     }
 
+    .scan-line {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      top: 10%;
+      height: 3px;
+      border-radius: 999px;
+      background: #20f768;
+      box-shadow: 0 0 16px rgba(32, 247, 104, 0.9), 0 0 34px rgba(32, 247, 104, 0.42);
+      animation: scanMove 1.65s ease-in-out infinite alternate;
+    }
+
+    @keyframes scanMove {
+      from {
+        transform: translateY(0);
+      }
+      to {
+        transform: translateY(calc(26dvh - 8px));
+      }
+    }
+
     .capture-frame {
       position: absolute;
       left: 8%;
@@ -308,6 +329,39 @@
       color: #fff;
       font-size: 11px;
       text-align: center;
+    }
+
+    .inner-items-overlay {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: calc(92px + env(safe-area-inset-bottom));
+      z-index: 7;
+      display: grid;
+      gap: 6px;
+      max-height: 23dvh;
+      overflow: auto;
+      padding: 10px;
+      border-radius: 14px;
+      color: #fff;
+      background: rgba(15, 23, 42, 0.50);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      backdrop-filter: blur(12px);
+    }
+
+    .inner-items-overlay h3 {
+      margin: 0 0 2px;
+      font-size: 13px;
+    }
+
+    .inner-items-overlay p {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 12px;
+      line-height: 1.35;
     }
 
     .toast {
@@ -611,21 +665,31 @@
 
     .content-mode .bottom-bar {
       display: grid;
-      grid-template-columns: 0.85fr 1.15fr;
+      grid-template-columns: 52px 1fr;
+      gap: 10px;
       background: rgba(255, 255, 255, 0.97);
       border-top: 1px solid #dfe6ef;
       box-shadow: 0 -12px 26px rgba(20, 38, 75, 0.08);
     }
 
-    .content-mode .bottom-bar #primaryBtn,
-    .content-mode .bottom-bar #secondaryBtn {
+    .content-mode .bottom-bar #primaryBtn {
       width: 100%;
       min-height: 50px;
       height: auto;
       border-radius: 999px;
       padding: 0 18px;
-      grid-column: auto;
+      grid-column: 2;
       grid-row: auto;
+    }
+
+    .content-mode .bottom-bar #secondaryBtn {
+      width: 52px;
+      min-height: 50px;
+      height: 50px;
+      padding: 0;
+      border-radius: 50%;
+      grid-column: 1;
+      grid-row: 1;
     }
 
     .content-mode .bottom-bar .btn-content span {
@@ -640,6 +704,15 @@
     .content-mode .bottom-bar .btn-content svg {
       width: 20px;
       height: 20px;
+    }
+
+    .content-mode .bottom-bar #secondaryBtn .btn-content span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
     }
 
     .content-mode .bottom-bar button:not(.secondary) {
@@ -707,7 +780,9 @@
         <div class="video-wrap">
           <video id="video" playsinline muted></video>
           <div class="video-dim"></div>
-          <div id="scanFrame" class="scan-frame" aria-hidden="true"></div>
+          <div id="scanFrame" class="scan-frame" aria-hidden="true">
+            <div class="scan-line"></div>
+          </div>
         </div>
         <div class="camera-copy">
           <h2 class="camera-title">扫描退货订单</h2>
@@ -745,6 +820,7 @@
           <h2 class="camera-title">拍包裹内物品</h2>
           <p class="camera-hint">打开包裹后，把商品和配件一起拍清楚。</p>
         </div>
+        <div id="innerItemsOverlay" class="inner-items-overlay hidden"></div>
         <div id="innerPreviewCard" class="photo-preview hidden">
           <img id="innerPhoto" alt="包裹内物品照片">
           <span>内件照片</span>
@@ -827,6 +903,7 @@
     const buyerName = document.querySelector("#buyerName");
     const trackingNo = document.querySelector("#trackingNo");
     const itemsList = document.querySelector("#itemsList");
+    const innerItemsOverlay = document.querySelector("#innerItemsOverlay");
     const outerPhoto = document.querySelector("#outerPhoto");
     const innerPhoto = document.querySelector("#innerPhoto");
     const outerEvidence = document.querySelector("#outerEvidence");
@@ -1007,6 +1084,22 @@
       `).join("");
     }
 
+    function renderInnerItemsOverlay() {
+      if (!currentOrder) {
+        innerItemsOverlay.classList.add("hidden");
+        innerItemsOverlay.innerHTML = "";
+        return;
+      }
+
+      innerItemsOverlay.innerHTML = `
+        <h3>待拍物品</h3>
+        ${currentOrder.items.map((item) => `
+          <p><span>${item.sku}</span><strong>x${item.expectedQty}</strong></p>
+        `).join("")}
+      `;
+      innerItemsOverlay.classList.remove("hidden");
+    }
+
     async function checkSupport() {
       if (!("BarcodeDetector" in window)) {
         setSupport("不支持原生扫码", "bad");
@@ -1093,6 +1186,7 @@
       innerPhotoData = "";
       outerPreviewCard.classList.add("hidden");
       innerPreviewCard.classList.add("hidden");
+      renderInnerItemsOverlay();
       showToast(`已扫描：${currentOrder.returnNo}`);
       showScreen("outer");
       await ensureCamera();
@@ -1165,6 +1259,8 @@
       innerPhoto.removeAttribute("src");
       outerEvidence.removeAttribute("src");
       innerEvidence.removeAttribute("src");
+      innerItemsOverlay.classList.add("hidden");
+      innerItemsOverlay.innerHTML = "";
       outerPreviewCard.classList.add("hidden");
       innerPreviewCard.classList.add("hidden");
       showScreen("scan");
