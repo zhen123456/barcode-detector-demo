@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chrome BarcodeDetector 扫码 Demo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      background: #f5f7fb;
+      color: #182033;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    main {
+      width: min(960px, 100%);
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+    }
+
+    section {
+      background: #ffffff;
+      border: 1px solid #dce3ef;
+      border-radius: 8px;
+      box-shadow: 0 14px 34px rgba(20, 38, 75, 0.08);
+    }
+
+    .scanner {
+      overflow: hidden;
+    }
+
+    .video-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: #111827;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .scan-box {
+      position: absolute;
+      inset: 18%;
+      border: 2px solid #22c55e;
+      border-radius: 8px;
+      box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.24);
+      pointer-events: none;
+    }
+
+    .controls,
+    .panel {
+      padding: 18px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 22px;
+      line-height: 1.25;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    p {
+      margin: 0 0 14px;
+      line-height: 1.65;
+      color: #526071;
+    }
+
+    button {
+      min-height: 40px;
+      border: 0;
+      border-radius: 6px;
+      padding: 0 14px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #ffffff;
+      background: #1267d8;
+    }
+
+    button.secondary {
+      color: #182033;
+      background: #e8edf5;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      border-radius: 999px;
+      padding: 0 10px;
+      font-size: 13px;
+      background: #eef2f8;
+      color: #42526a;
+    }
+
+    .status.ok {
+      color: #166534;
+      background: #dcfce7;
+    }
+
+    .status.warn {
+      color: #92400e;
+      background: #fef3c7;
+    }
+
+    .status.bad {
+      color: #991b1b;
+      background: #fee2e2;
+    }
+
+    dl {
+      margin: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    dt {
+      font-size: 12px;
+      color: #6b778a;
+      margin-bottom: 4px;
+    }
+
+    dd {
+      margin: 0;
+      min-height: 24px;
+      overflow-wrap: anywhere;
+    }
+
+    code,
+    pre {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+    }
+
+    pre {
+      min-height: 128px;
+      max-height: 230px;
+      overflow: auto;
+      white-space: pre-wrap;
+      background: #f6f8fb;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .hint {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 12px;
+        align-items: flex-start;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="scanner">
+      <div class="video-wrap">
+        <video id="video" playsinline muted></video>
+        <div class="scan-box" aria-hidden="true"></div>
+      </div>
+      <div class="controls">
+        <h1>Chrome 原生扫码识别 Demo</h1>
+        <p>这个页面只调用浏览器内置的 <code>BarcodeDetector</code>。如果当前 Chrome 不支持，会直接提示不可用。</p>
+        <span id="supportStatus" class="status">正在检测...</span>
+        <div class="button-row">
+          <button id="startBtn" type="button">开启摄像头并扫码</button>
+          <button id="stopBtn" class="secondary" type="button" disabled>停止</button>
+        </div>
+        <div class="hint">建议用 Android Chrome、ChromeOS 或 macOS Chrome 测试；Windows Chrome 很可能不支持原生识别。</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>识别状态</h2>
+      <dl>
+        <div>
+          <dt>支持的码制</dt>
+          <dd id="formats">-</dd>
+        </div>
+        <div>
+          <dt>最近结果</dt>
+          <dd id="lastResult">未开始</dd>
+        </div>
+        <div>
+          <dt>日志</dt>
+          <dd><pre id="log"></pre></dd>
+        </div>
+      </dl>
+    </section>
+  </main>
+
+  <script>
+    const video = document.querySelector("#video");
+    const startBtn = document.querySelector("#startBtn");
+    const stopBtn = document.querySelector("#stopBtn");
+    const supportStatus = document.querySelector("#supportStatus");
+    const formatsEl = document.querySelector("#formats");
+    const lastResult = document.querySelector("#lastResult");
+    const logEl = document.querySelector("#log");
+
+    let detector = null;
+    let stream = null;
+    let scanning = false;
+    let rafId = 0;
+
+    const preferredFormats = [
+      "qr_code",
+      "aztec",
+      "code_128",
+      "code_39",
+      "code_93",
+      "codabar",
+      "data_matrix",
+      "ean_13",
+      "ean_8",
+      "itf",
+      "pdf417",
+      "upc_a",
+      "upc_e"
+    ];
+
+    function log(message) {
+      const time = new Date().toLocaleTimeString();
+      logEl.textContent = `[${time}] ${message}\n${logEl.textContent}`;
+    }
+
+    function setStatus(text, className) {
+      supportStatus.textContent = text;
+      supportStatus.className = `status ${className || ""}`.trim();
+    }
+
+    async function checkSupport() {
+      if (!("BarcodeDetector" in window)) {
+        setStatus("当前浏览器不支持 BarcodeDetector", "bad");
+        startBtn.disabled = true;
+        log("window.BarcodeDetector 不存在");
+        return;
+      }
+
+      try {
+        const supportedFormats = await BarcodeDetector.getSupportedFormats();
+        formatsEl.textContent = supportedFormats.length ? supportedFormats.join(", ") : "浏览器未返回支持列表";
+
+        const usableFormats = preferredFormats.filter((format) => supportedFormats.includes(format));
+        detector = new BarcodeDetector({
+          formats: usableFormats.length ? usableFormats : supportedFormats
+        });
+
+        setStatus("支持 BarcodeDetector", "ok");
+        log(`原生识别可用，支持 ${supportedFormats.length} 种码制`);
+      } catch (error) {
+        setStatus("BarcodeDetector 初始化失败", "bad");
+        startBtn.disabled = true;
+        log(error.message || String(error));
+      }
+    }
+
+    async function startScanner() {
+      if (!detector) return;
+
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+
+        video.srcObject = stream;
+        await video.play();
+
+        scanning = true;
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        lastResult.textContent = "扫描中...";
+        log("摄像头已开启");
+        scanLoop();
+      } catch (error) {
+        log(`摄像头开启失败：${error.message || String(error)}`);
+        lastResult.textContent = "摄像头开启失败，请检查权限或是否在 localhost/HTTPS 下访问";
+      }
+    }
+
+    async function scanLoop() {
+      if (!scanning) return;
+
+      try {
+        const barcodes = await detector.detect(video);
+        if (barcodes.length > 0) {
+          const lines = barcodes.map((barcode) => `${barcode.format}: ${barcode.rawValue}`);
+          lastResult.textContent = lines.join(" | ");
+          log(`识别到 ${barcodes.length} 个码：${lines.join(" ; ")}`);
+        }
+      } catch (error) {
+        log(`识别失败：${error.message || String(error)}`);
+      }
+
+      rafId = requestAnimationFrame(scanLoop);
+    }
+
+    function stopScanner() {
+      scanning = false;
+      cancelAnimationFrame(rafId);
+
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+        stream = null;
+      }
+
+      video.srcObject = null;
+      startBtn.disabled = !detector;
+      stopBtn.disabled = true;
+      log("已停止扫描");
+    }
+
+    startBtn.addEventListener("click", startScanner);
+    stopBtn.addEventListener("click", stopScanner);
+    window.addEventListener("beforeunload", stopScanner);
+
+    checkSupport();
+  </script>
+</body>
+</html>
